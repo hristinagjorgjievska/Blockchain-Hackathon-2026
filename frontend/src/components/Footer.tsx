@@ -19,7 +19,7 @@ export function Footer() {
         <div>
           <div className="flex items-center gap-2.5">
             <span className="grid h-9 w-9 place-items-center overflow-hidden rounded-lg ring-1 ring-white/20">
-              <img src="/mvr.png" alt="" className="h-full w-full object-cover" />
+              <img src="/logo.png" alt="" className="h-full w-full object-cover" />
             </span>
             <span className="font-display text-base font-bold tracking-tight text-white">
               SafeChain MK

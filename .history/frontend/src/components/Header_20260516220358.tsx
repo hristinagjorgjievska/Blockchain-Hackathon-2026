@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ConnectButton } from 'thirdweb/react';
+import { ConnectButton, useActiveAccount } from 'thirdweb/react';
 import { inAppWallet, createWallet } from 'thirdweb/wallets';
 import { thirdwebClient } from '../thirdweb/client';
 import { useLang } from '../i18n/LangContext';
@@ -86,6 +86,8 @@ function LangToggle({ lang, setLang }: { lang: Lang; setLang: (l: Lang) => void 
 }
 
 function SolanaConnectButton({ label }: { label: string }) {
+  const account = useActiveAccount();
+
   return (
     <ConnectButton
       client={thirdwebClient}
@@ -94,8 +96,32 @@ function SolanaConnectButton({ label }: { label: string }) {
       connectModal={{
         size: 'compact',
         title: 'SafeChain MK',
-        titleIcon: '/mvr.png',
+        titleIcon: '/logo.png',
       }}
+      detailsButton={
+        account
+          ? {
+              render: () => (
+                <button
+                  type="button"
+                  className="flex items-center gap-2 rounded-xl bg-gradient-to-b from-blue-600 to-blue-700 px-3 py-2 text-sm font-semibold text-white transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300"
+                >
+                  <span
+                    aria-hidden
+                    className="h-2 w-2 rounded-full"
+                    style={{ background: 'linear-gradient(135deg,#9945ff,#14f195)' }}
+                  />
+                  <span className="font-mono text-xs">
+                    {account.address.slice(0, 6)}…{account.address.slice(-4)}
+                  </span>
+                  <span className="rounded bg-white/20 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide">
+                    SOL
+                  </span>
+                </button>
+              ),
+            }
+          : { displayBalanceToken: undefined }
+      }
       theme="dark"
     />
   );
@@ -128,7 +154,7 @@ export function Header({ onHome }: { onHome: () => void }) {
           >
             <span className="grid h-11 w-11 place-items-center overflow-hidden rounded-lg shadow-[0_6px_16px_-4px_rgba(0,0,0,0.45)] ring-1 ring-white/25 transition-transform duration-150 group-hover:scale-[1.04]">
               <img
-                src="/logo.png"
+                src="/mvr.png"
                 alt=""
                 className="h-full w-full object-cover"
                 width={44}

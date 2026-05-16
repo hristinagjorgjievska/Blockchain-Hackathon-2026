@@ -1,5 +1,5 @@
 import { useLang } from '../i18n/LangContext';
-import { IconBuilding, IconLock, IconShield } from './Icons';
+import { IconBuilding, IconLock } from './Icons';
 
 export function Footer() {
   const { t } = useLang();
@@ -18,8 +18,8 @@ export function Footer() {
       <div className="relative mx-auto grid max-w-6xl gap-10 px-4 py-14 sm:grid-cols-3">
         <div>
           <div className="flex items-center gap-2.5">
-            <span className="grid h-9 w-9 place-items-center rounded-lg bg-gradient-to-br from-blue-500 to-blue-700 ring-1 ring-white/20">
-              <IconShield className="h-5 w-5 text-white" />
+            <span className="grid h-9 w-9 place-items-center overflow-hidden rounded-lg ring-1 ring-white/20">
+              <img src="/logo.png" alt="" className="h-full w-full object-cover" />
             </span>
             <span className="font-display text-base font-bold tracking-tight text-white">
               SafeChain MK

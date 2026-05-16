@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLang } from '../i18n/LangContext';
 import { amountDueNowMKD, type Violation } from '../data/violations';
 import { setLocalStatus } from '../lib/violationStatusStore';
+import { saveAppeal } from '../lib/appealStore';
 
 const IcDoc = ({ cls }: { cls?: string }) => (
   <svg className={cls} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
@@ -163,7 +164,7 @@ function dataUrlToBytes(dataUrl: string): Uint8Array {
   return bytes;
 }
 
-async function buildPdf(appealText: string, v: Violation, images: string[] = [], signatureDataUrl?: string | null): Promise<Blob> {
+export async function buildAppealPdf(appealText: string, v: Violation, images: string[] = [], signatureDataUrl?: string | null): Promise<Blob> {
   const { PDFDocument, rgb } = await import('pdf-lib');
   const fontkit = await import('@pdf-lib/fontkit');
 
@@ -809,7 +810,7 @@ export function AppealGenerator({
 
   const regeneratePdf = useCallback(async (text: string, sigData?: string | null) => {
     try {
-      const blob = await buildPdf(text, violation, images, sigData);
+      const blob = await buildAppealPdf(text, violation, images, sigData);
       if (blobRef.current) URL.revokeObjectURL(blobRef.current);
       const url = URL.createObjectURL(blob);
       blobRef.current = url;
@@ -823,7 +824,7 @@ export function AppealGenerator({
 
     try {
       const text = buildAppealText(violation, ground, description);
-      const blob = await buildPdf(text, violation, images);
+      const blob = await buildAppealPdf(text, violation, images);
 
       if (blobRef.current) URL.revokeObjectURL(blobRef.current);
       const url = URL.createObjectURL(blob);
@@ -1152,18 +1153,49 @@ export function AppealGenerator({
 
               {pdfUrl && (
                 <div className="rounded-xl overflow-hidden border border-slate-200">
-                  <div className="flex items-center gap-2 bg-slate-50 border-b border-slate-200 px-4 py-2">
-                    <IcDoc cls="h-4 w-4 text-slate-400" />
-                    <span className="text-xs font-medium text-slate-600">
-                      {t('appeal.pdfPreview', { ref: violation.refId })}
-                    </span>
+                  <div className="flex items-center justify-between gap-2 bg-slate-50 border-b border-slate-200 px-4 py-2">
+                    <div className="flex items-center gap-2">
+                      <IcDoc cls="h-4 w-4 text-slate-400" />
+                      <span className="text-xs font-medium text-slate-600">
+                        {t('appeal.pdfPreview', { ref: violation.refId })}
+                      </span>
+                    </div>
+                    <a
+                      href={pdfUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex items-center gap-1 rounded-lg bg-blue-600 px-2.5 py-1 text-xs font-semibold text-white hover:bg-blue-700 transition"
+                    >
+                      <IcEye cls="h-3.5 w-3.5" />
+                      {lang === 'mk' ? 'Отвори' : lang === 'sr' ? 'Отвори' : 'Open'}
+                    </a>
                   </div>
-                  <iframe
-                    src={`${pdfUrl}#toolbar=0`}
-                    title={t('appeal.iframeTitle')}
-                    className="w-full"
-                    style={{ height: 520, border: 'none' }}
-                  />
+                  <object
+                    data={pdfUrl}
+                    type="application/pdf"
+                    className="w-full bg-slate-100"
+                    style={{ height: 520 }}
+                  >
+                    <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
+                      <IcDoc cls="h-10 w-10 text-slate-300" />
+                      <p className="text-sm text-slate-500">
+                        {lang === 'mk'
+                          ? 'Прегледот на PDF не е поддржан во овој пребарувач.'
+                          : lang === 'sr'
+                            ? 'Приказ PDF-а није подржан у овом прегледачу.'
+                            : 'PDF preview is not supported in this browser.'}
+                      </p>
+                      <a
+                        href={pdfUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition"
+                      >
+                        <IcEye cls="h-4 w-4" />
+                        {lang === 'mk' ? 'Отвори PDF' : lang === 'sr' ? 'Отвори PDF' : 'Open PDF'}
+                      </a>
+                    </div>
+                  </object>
                 </div>
               )}
 
@@ -1193,6 +1225,7 @@ export function AppealGenerator({
               <button
                 type="button"
                 onClick={() => {
+                  saveAppeal(violation.code, appealText);
                   setLocalStatus(violation.code, 'appeal_pending');
                   onAppealSubmitted?.();
                 }}
