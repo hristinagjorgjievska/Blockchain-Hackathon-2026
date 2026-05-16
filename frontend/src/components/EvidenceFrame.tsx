@@ -6,55 +6,6 @@ import { type Violation } from '../data/violations';
 const VIEWBOX = '0 0 960 600';
 const CYAN = '#4fd6e8';
 
-/** Renders an EU-style Macedonian licence plate. */
-function plateGroup(x: number, y: number, w: number, plate: string) {
-  const h = w / 4.6;
-  const r = h * 0.16;
-  const stripW = w * 0.16;
-  return (
-    <g>
-      <rect
-        x={x}
-        y={y}
-        width={w}
-        height={h}
-        rx={r}
-        fill="#f4f5f3"
-        stroke="#0d0f15"
-        strokeWidth={Math.max(1, h * 0.045)}
-      />
-      <path
-        d={`M ${x + r} ${y} L ${x + stripW} ${y} L ${x + stripW} ${y + h} L ${x + r} ${y + h} Q ${x} ${y + h} ${x} ${y + h - r} L ${x} ${y + r} Q ${x} ${y} ${x + r} ${y} Z`}
-        fill="#0a39c4"
-      />
-      <text
-        x={x + stripW / 2}
-        y={y + h * 0.68}
-        fill="#ffffff"
-        fontSize={h * 0.26}
-        fontWeight={700}
-        textAnchor="middle"
-        dominantBaseline="central"
-        fontFamily="system-ui, sans-serif"
-      >
-        MK
-      </text>
-      <text
-        x={x + stripW + (w - stripW) / 2}
-        y={y + h / 2}
-        fill="#16181d"
-        fontSize={h * 0.46}
-        fontWeight={800}
-        textAnchor="middle"
-        dominantBaseline="central"
-        fontFamily="'Helvetica Neue', Arial, sans-serif"
-      >
-        {plate}
-      </text>
-    </g>
-  );
-}
-
 function cornerBrackets(x: number, y: number, w: number, h: number, len: number, color: string) {
   return (
     <g stroke={color} strokeWidth={3} fill="none" strokeLinecap="round">
