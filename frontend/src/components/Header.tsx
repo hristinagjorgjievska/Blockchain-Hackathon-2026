@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ConnectButton } from 'thirdweb/react';
 import { inAppWallet, createWallet } from 'thirdweb/wallets';
 import { thirdwebClient } from '../thirdweb/client';
@@ -85,12 +85,23 @@ function LangToggle({ lang, setLang }: { lang: Lang; setLang: (l: Lang) => void 
   );
 }
 
+const CONNECT_BTN_STYLE: React.CSSProperties = {
+  fontSize: '12px',
+  fontWeight: 700,
+  padding: '0 10px',
+  borderRadius: '6px',
+  height: '32px',
+  minHeight: '32px',
+  minWidth: 'auto',
+  lineHeight: 1,
+};
+
 function SolanaConnectButton({ label }: { label: string }) {
   return (
     <ConnectButton
       client={thirdwebClient}
       wallets={WALLETS}
-      connectButton={{ label }}
+      connectButton={{ label, style: CONNECT_BTN_STYLE }}
       connectModal={{
         size: 'compact',
         title: 'SafeChain MK',

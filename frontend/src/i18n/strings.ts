@@ -178,7 +178,7 @@ const mk: Record<string, string> = {
   'nft.card.inZone': 'во зона од',
 
   // NFT Carousel
-  'carousel.title': 'Вашите прекршоци на блокчејн',
+  'carousel.title': 'Вашите прекршоци',
   'carousel.subtitle': '{count} NFT записи поврзани со вашиот паричник',
   'carousel.refId': 'Референтен број',
   'carousel.amountDue': 'Износ за плаќање',
@@ -218,7 +218,7 @@ const mk: Record<string, string> = {
   'pay.connect.title': 'Поврзете паричник за да платите',
   'pay.connect.body': 'Поврзете Solana паричник (на пр. Phantom) поставен на Devnet.',
   'pay.wallet': 'Поврзан паричник',
-  'pay.payNow': 'Плати {amount} SOL',
+  'pay.payNow': 'Плати со {amount}',
   'pay.preparing': 'Се подготвува трансакцијата…',
   'pay.confirming': 'Се потврдува на блокчејн…',
   'pay.processing': 'Се обработува плаќањето',
@@ -519,7 +519,7 @@ const en: Record<string, string> = {
   'nft.card.inZone': 'in',
 
   // NFT Carousel
-  'carousel.title': 'Your violations on-chain',
+  'carousel.title': 'Your violations',
   'carousel.subtitle': '{count} NFT records linked to your wallet',
   'carousel.refId': 'Reference ID',
   'carousel.amountDue': 'Amount due',
@@ -559,7 +559,7 @@ const en: Record<string, string> = {
   'pay.connect.title': 'Connect a wallet to pay',
   'pay.connect.body': 'Connect a Solana wallet (e.g. Phantom) set to Devnet.',
   'pay.wallet': 'Connected wallet',
-  'pay.payNow': 'Pay {amount} SOL',
+  'pay.payNow': 'Pay with {amount}',
   'pay.preparing': 'Preparing transaction…',
   'pay.confirming': 'Confirming on-chain…',
   'pay.processing': 'Processing payment',
@@ -848,7 +848,7 @@ const srLatin: Record<string, string> = {
   'nft.card.inZone': 'u zoni od',
 
   // NFT Carousel
-  'carousel.title': 'Vaši prekršaji na blockchainu',
+  'carousel.title': 'Vaši prekršaji',
   'carousel.subtitle': '{count} NFT zapisa povezanih sa vašim novčanikom',
   'carousel.refId': 'Referentni broj',
   'carousel.amountDue': 'Iznos za plaćanje',
@@ -887,7 +887,7 @@ const srLatin: Record<string, string> = {
   'pay.connect.title': 'Povežite novčanik za plaćanje',
   'pay.connect.body': 'Povežite Solana novčanik, npr. Phantom, podešen na Devnet.',
   'pay.wallet': 'Povezan novčanik',
-  'pay.payNow': 'Plati {amount} SOL',
+  'pay.payNow': 'Plati sa {amount}',
   'pay.preparing': 'Priprema transakcije…',
   'pay.confirming': 'Potvrđuje se na blockchainu…',
   'pay.processing': 'Obrada plaćanja',
@@ -1135,7 +1135,7 @@ const sr: Record<string, string> = {
   'nft.card.inZone': 'у зони од',
 
   // NFT Carousel
-  'carousel.title': 'Ваши прекршаји на блокчејну',
+  'carousel.title': 'Ваши прекршаји',
   'carousel.subtitle': '{count} NFT записа повезаних са вашим новчаником',
   'carousel.refId': 'Референтни број',
   'carousel.amountDue': 'Износ за плаћање',
@@ -1174,7 +1174,7 @@ const sr: Record<string, string> = {
   'pay.connect.title': 'Повежите новчаник за плаћање',
   'pay.connect.body': 'Повежите Solana новчаник, нпр. Phantom, подешен на Devnet.',
   'pay.wallet': 'Повезан новчаник',
-  'pay.payNow': 'Плати {amount} SOL',
+  'pay.payNow': 'Плати са {amount}',
   'pay.preparing': 'Припрема трансакције…',
   'pay.confirming': 'Потврђује се на блокчејну…',
   'pay.processing': 'Обрада плаћања',

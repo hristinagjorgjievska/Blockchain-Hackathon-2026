@@ -498,9 +498,6 @@ export function PaymentPanel({ violation, fingerprint, paid, onPaid }: Props) {
           />
           <div className="my-1 border-t border-dashed border-slate-300" />
           <Row label={t('pay.total')} value={formatMKD(amountMKD, lang)} strong />
-          {method === 'crypto' && (
-            <Row label={t('pay.sol')} value={formatSOL(amountSol)} strong accent="text-blue-700" />
-          )}
           <p className="pt-1 text-xs leading-relaxed text-slate-500">
             {violation.legalNote[lang]}
           </p>
@@ -681,7 +678,7 @@ export function PaymentPanel({ violation, fingerprint, paid, onPaid }: Props) {
                   <IconBolt className="h-5 w-5" />
                   {status === 'error'
                     ? t('pay.retry')
-                    : t('pay.payNow', { amount: amountSol.toFixed(3) })}
+                    : t('pay.payNow', { amount: formatMKD(amountMKD, lang) })}
                 </button>
               </>
             )}
