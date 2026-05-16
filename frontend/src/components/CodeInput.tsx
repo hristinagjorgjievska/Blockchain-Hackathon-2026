@@ -1,0 +1,121 @@
+import { useState, type FormEvent } from 'react';
+import { useLang } from '../i18n/LangContext';
+import { VIOLATIONS } from '../data/violations';
+import {
+  IconAlert,
+  IconArrowRight,
+  IconChevronDown,
+  IconKey,
+  IconSearch,
+  IconSpinner,
+} from './Icons';
+
+interface Props {
+  onSubmit: (code: string) => void;
+  loading: boolean;
+  error: string | null;
+}
+
+export function CodeInput({ onSubmit, loading, error }: Props) {
+  const { t } = useLang();
+  const [value, setValue] = useState('');
+
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    if (!loading) onSubmit(value);
+  };
+
+  return (
+    <form
+      onSubmit={handleSubmit}
+      className="overflow-hidden rounded-2xl bg-white shadow-float ring-1 ring-navy-950/5"
+    >
+      <div
+        aria-hidden
+        className="h-1 w-full bg-gradient-to-r from-blue-500 via-blue-600 to-blue-500"
+      />
+      <div className="p-5 sm:p-6">
+        <label htmlFor="code" className="flex items-center gap-2.5">
+          <span className="grid h-9 w-9 place-items-center rounded-lg bg-blue-50 text-blue-700 ring-1 ring-blue-100">
+            <IconKey className="h-5 w-5" />
+          </span>
+          <span className="font-display text-[15px] font-bold text-slate-900">
+            {t('code.label')}
+          </span>
+        </label>
+
+        <div className="mt-4 flex flex-col gap-2.5 sm:flex-row">
+          <input
+            id="code"
+            name="code"
+            value={value}
+            onChange={(e) => setValue(e.target.value.toUpperCase())}
+            placeholder={t('code.placeholder')}
+            spellCheck={false}
+            autoComplete="off"
+            autoCapitalize="characters"
+            aria-invalid={error ? true : undefined}
+            aria-describedby={error ? 'code-error' : 'code-help'}
+            className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3.5 font-mono text-lg tracking-[0.12em] text-slate-900 outline-none transition-colors duration-150 placeholder:tracking-normal placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-200"
+          />
+          <button
+            type="submit"
+            disabled={loading}
+            aria-busy={loading}
+            className="flex shrink-0 items-center justify-center gap-2 rounded-xl bg-gradient-to-b from-blue-600 to-blue-700 px-6 py-3.5 font-semibold text-white shadow-[0_10px_24px_-10px_rgba(37,99,235,0.85)] transition duration-150 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 focus-visible:ring-offset-2 active:translate-y-px disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:brightness-100"
+          >
+            {loading ? (
+              <IconSpinner className="h-5 w-5 animate-spin" />
+            ) : (
+              <IconSearch className="h-5 w-5" />
+            )}
+            {loading ? t('code.checking') : t('code.check')}
+          </button>
+        </div>
+
+        {error ? (
+          <p
+            id="code-error"
+            className="mt-2.5 flex items-start gap-1.5 text-sm font-medium text-red-600"
+          >
+            <IconAlert className="mt-0.5 h-4 w-4 shrink-0" />
+            <span>{error}</span>
+          </p>
+        ) : (
+          <p id="code-help" className="mt-2.5 text-sm text-slate-500">
+            {t('code.help')}
+          </p>
+        )}
+
+        <details className="group mt-4 rounded-xl border border-slate-200 bg-slate-50/80">
+          <summary className="flex cursor-pointer select-none items-center justify-between gap-2 rounded-xl px-3.5 py-2.5 text-sm font-medium text-slate-600 transition-colors hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-200">
+            <span className="flex items-center gap-2">
+              <IconKey className="h-4 w-4 text-slate-400" />
+              {t('code.demo.title')}
+            </span>
+            <IconChevronDown className="h-4 w-4 text-slate-400 transition-transform duration-200 group-open:rotate-180" />
+          </summary>
+          <div className="px-3.5 pb-3.5">
+            <p className="text-xs text-slate-500">{t('code.demo.hint')}</p>
+            <div className="mt-2.5 flex flex-wrap gap-2">
+              {VIOLATIONS.map((v) => (
+                <button
+                  key={v.code}
+                  type="button"
+                  onClick={() => {
+                    setValue(v.code);
+                    if (!loading) onSubmit(v.code);
+                  }}
+                  className="group/code flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 font-mono text-xs font-medium text-slate-700 transition-colors duration-150 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-200"
+                >
+                  {v.code}
+                  <IconArrowRight className="h-3.5 w-3.5 opacity-0 transition-opacity group-hover/code:opacity-100" />
+                </button>
+              ))}
+            </div>
+          </div>
+        </details>
+      </div>
+    </form>
+  );
+}

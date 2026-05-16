@@ -1,0 +1,100 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  color: #1e293b;
+  background-color: #e9eef6;
+  background-image:
+    radial-gradient(ellipse 92% 56% at 50% -10%, rgba(37, 99, 235, 0.16), transparent 60%),
+    radial-gradient(ellipse 48% 36% at 98% 2%, rgba(20, 241, 149, 0.07), transparent 55%),
+    radial-gradient(ellipse 52% 40% at 0% 10%, rgba(10, 31, 60, 0.07), transparent 58%);
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: rgba(37, 99, 235, 0.22);
+  color: #06152b;
+}
+
+/* Choreographed scroll-reveal entrance. */
+.reveal {
+  opacity: 0;
+  transform: translateY(18px);
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .reveal {
+    transition:
+      opacity 0.62s cubic-bezier(0, 0, 0.2, 1),
+      transform 0.62s cubic-bezier(0, 0, 0.2, 1);
+  }
+}
+
+/* Faint engineering grid for the hero, masked so it fades at the edges. */
+.hero-grid {
+  background-image:
+    linear-gradient(rgba(125, 165, 225, 0.16) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(125, 165, 225, 0.16) 1px, transparent 1px);
+  background-size: 56px 56px;
+  -webkit-mask-image: radial-gradient(ellipse 62% 58% at 50% 32%, #000 6%, transparent 80%);
+  mask-image: radial-gradient(ellipse 62% 58% at 50% 32%, #000 6%, transparent 80%);
+}
+
+/* Solana wallet-adapter button — themed to match the portal. */
+.wallet-adapter-button-trigger {
+  background: linear-gradient(180deg, #2563eb, #1d4ed8) !important;
+  border-radius: 0.75rem !important;
+  height: auto !important;
+  padding: 0.6rem 1rem !important;
+  font-family: 'Inter', system-ui, sans-serif !important;
+  font-size: 0.8125rem !important;
+  font-weight: 600 !important;
+  line-height: 1.2 !important;
+  box-shadow: 0 8px 20px -8px rgba(37, 99, 235, 0.6) !important;
+  transition:
+    background-color 0.15s ease-out,
+    transform 0.1s ease-out !important;
+}
+.wallet-adapter-button:not([disabled]):hover {
+  background: linear-gradient(180deg, #1d4ed8, #1e40af) !important;
+}
+.wallet-adapter-button-trigger:not([disabled]):active {
+  transform: translateY(1px) !important;
+}
+.wallet-adapter-button-trigger:focus-visible {
+  outline: 2px solid #93c5fd !important;
+  outline-offset: 2px !important;
+}
+.wallet-adapter-dropdown {
+  display: inline-flex;
+}
+
+/* Respect reduced-motion globally as a safety net. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
