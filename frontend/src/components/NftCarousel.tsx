@@ -199,7 +199,7 @@ export function NftCarousel({ onOpen }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [violations, setViolations] = useState<Violation[]>(VIOLATIONS);
   const address = account?.address ?? '';
-  const ownerName = 'Андреј Сојаноски';
+  const ownerName = 'Андреј Стојаноски';
   const licensePlate = 'SK 501 TB';
 
   useEffect(() => {

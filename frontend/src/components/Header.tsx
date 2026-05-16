@@ -61,11 +61,11 @@ export function Header({ onHome }: { onHome: () => void }) {
             aria-label="SafeChain MK — почетна"
             className="group flex items-center gap-2.5 rounded-xl text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 focus-visible:ring-offset-2 focus-visible:ring-offset-navy-900"
           >
-            <span className="grid h-11 w-11 place-items-center rounded-lg bg-white p-1 shadow-[0_6px_16px_-4px_rgba(0,0,0,0.45)] ring-1 ring-white/25 transition-transform duration-150 group-hover:scale-[1.04]">
+            <span className="grid h-11 w-11 place-items-center overflow-hidden rounded-lg shadow-[0_6px_16px_-4px_rgba(0,0,0,0.45)] ring-1 ring-white/25 transition-transform duration-150 group-hover:scale-[1.04]">
               <img
                 src="/mvr.png"
                 alt=""
-                className="h-full w-full object-contain"
+                className="h-full w-full object-cover"
                 width={44}
                 height={44}
               />
