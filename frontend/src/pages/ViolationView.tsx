@@ -68,7 +68,7 @@ export function ViolationView({
   );
   const [fingerprint, setFingerprint] = useState<string | null>(null);
   const [paid, setPaid] = useState<PaymentRecord | null>(() => getPayment(code));
-  const [paidSubmitted, setPaidSubmitted] = useState(false);
+  const [paidSubmitted, setPaidSubmitted] = useState(() => !!getPayment(code));
   const [appealPending, setAppealPending] = useState<boolean>(
     () => getLocalStatus(code) === 'appeal_pending',
   );
