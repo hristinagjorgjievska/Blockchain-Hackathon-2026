@@ -5,29 +5,55 @@ import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { Home } from './pages/Home';
 import { ViolationView } from './pages/ViolationView';
-import type { Violation } from './data/violations';
+import { isValidCodeFormat, type Violation } from './data/violations';
 
 type View = { name: 'home' } | { name: 'violation'; code: string; violation?: Violation };
 
+function viewFromHash(): View {
+  const hash = window.location.hash.replace(/^#/, '').trim();
+  if (hash && isValidCodeFormat(hash)) return { name: 'violation', code: hash };
+  return { name: 'home' };
+}
+
 function Shell() {
-  const [view, setView] = useState<View>({ name: 'home' });
+  const [view, setView] = useState<View>(viewFromHash);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [view]);
 
+  // Keep URL in sync with the active view.
+  useEffect(() => {
+    const targetHash = view.name === 'violation' ? `#${view.code}` : '';
+    if (window.location.hash !== targetHash) {
+      history.pushState(null, '', targetHash || location.pathname + location.search);
+    }
+  }, [view]);
+
+  // Handle browser back / forward.
+  useEffect(() => {
+    const onPopState = () => setView(viewFromHash());
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, []);
+
+  const goToViolation = (violation: Violation) =>
+    setView({ name: 'violation', code: violation.code, violation });
+
+  const goHome = () => setView({ name: 'home' });
+
   return (
     <div className="flex min-h-full flex-col">
-      <Header onHome={() => setView({ name: 'home' })} />
+      <Header onHome={goHome} />
       <main className="flex-1">
         <div key={view.name === 'home' ? 'home' : view.code} className="animate-fadeIn">
           {view.name === 'home' ? (
-            <Home onFound={(violation) => setView({ name: 'violation', code: violation.code, violation })} />
+            <Home onFound={goToViolation} />
           ) : (
             <ViolationView
               code={view.code}
               initialViolation={view.violation}
-              onBack={() => setView({ name: 'home' })}
+              onBack={goHome}
             />
           )}
         </div>

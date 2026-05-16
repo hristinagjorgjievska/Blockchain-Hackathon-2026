@@ -156,11 +156,17 @@ const mk: Record<string, string> = {
   'pay.rateNote': 'Демо курс: 1 SOL = 100.000 ден. (Solana devnet)',
   'pay.method.card': 'Картичка / банка',
   'pay.method.crypto': 'Крипто',
-  'pay.card.title': 'Плаќање без крипто',
+  'pay.card.title': 'Плаќање со картичка',
   'pay.card.body':
     'Плаќањето се запишува преку backend и Supabase како официјална евиденција за некрипто уплата.',
-  'pay.card.payNow': 'Плати без крипто',
-  'pay.card.processing': 'Се евидентира уплатата…',
+  'pay.card.nameLabel': 'Сопственик на картичката',
+  'pay.card.namePlaceholder': 'Иван Петровски',
+  'pay.card.numberLabel': 'Број на картичка',
+  'pay.card.expiryLabel': 'Важи до',
+  'pay.card.cvcLabel': 'CVC / CVV',
+  'pay.card.secure': 'Безбедна, шифрирана врска',
+  'pay.card.payNow': 'Плати со картичка',
+  'pay.card.processing': 'Се обработува уплатата…',
   'pay.card.note':
     'За продукција тука се поврзува официјален картичен или банкарски процесор; прототипот запишува потврдена уплата во базата.',
   'pay.connect.title': 'Поврзете паричник за да платите',
@@ -199,6 +205,8 @@ const mk: Record<string, string> = {
   'pay.receipt.note':
     'Потврдата се чува локално и во backend. Блокчејн уплатите може јавно да се проверат на Solana Explorer.',
   'pay.alreadyPaid': 'Оваа казна е веќе платена.',
+  'pay.receipt.downloadPdf': 'Превземи PDF потврда',
+  'pay.receipt.pdfGenerating': 'Се генерира PDF…',
 
   // Appeal
   'appeal.title': 'Поднеси приговор',
@@ -442,11 +450,17 @@ const en: Record<string, string> = {
   'pay.rateNote': 'Demo rate: 1 SOL = EUR 1,626.02 (100,000 MKD, Solana devnet)',
   'pay.method.card': 'Card / bank',
   'pay.method.crypto': 'Crypto',
-  'pay.card.title': 'Pay without crypto',
+  'pay.card.title': 'Pay by card',
   'pay.card.body':
     'The payment is recorded through the backend and Supabase as the official non-crypto payment record.',
-  'pay.card.payNow': 'Pay without crypto',
-  'pay.card.processing': 'Recording payment…',
+  'pay.card.nameLabel': 'Cardholder name',
+  'pay.card.namePlaceholder': 'Ivan Petrovski',
+  'pay.card.numberLabel': 'Card number',
+  'pay.card.expiryLabel': 'Expiry',
+  'pay.card.cvcLabel': 'CVC / CVV',
+  'pay.card.secure': 'Secure, encrypted connection',
+  'pay.card.payNow': 'Pay by card',
+  'pay.card.processing': 'Processing payment…',
   'pay.card.note':
     'In production this connects to an official card or bank processor; this prototype stores a confirmed payment in the database.',
   'pay.connect.title': 'Connect a wallet to pay',
@@ -486,6 +500,8 @@ const en: Record<string, string> = {
   'pay.receipt.note':
     'The receipt is stored locally and in the backend. Blockchain payments can also be verified on Solana Explorer.',
   'pay.alreadyPaid': 'This fine has already been paid.',
+  'pay.receipt.downloadPdf': 'Download PDF receipt',
+  'pay.receipt.pdfGenerating': 'Generating PDF…',
 
   // Appeal
   'appeal.title': 'Submit an appeal',
@@ -715,11 +731,17 @@ const srLatin: Record<string, string> = {
   'pay.rateNote': 'Demo kurs: 1 SOL = 100.000 MKD (Solana devnet)',
   'pay.method.card': 'Kartica / banka',
   'pay.method.crypto': 'Kripto',
-  'pay.card.title': 'Plaćanje bez kripta',
+  'pay.card.title': 'Plaćanje karticom',
   'pay.card.body':
     'Plaćanje se evidentira preko backend-a i Supabase baze kao zvanični zapis nekrypto uplate.',
-  'pay.card.payNow': 'Plati bez kripta',
-  'pay.card.processing': 'Evidentira se uplata…',
+  'pay.card.nameLabel': 'Ime vlasnika kartice',
+  'pay.card.namePlaceholder': 'Ivan Petrovski',
+  'pay.card.numberLabel': 'Broj kartice',
+  'pay.card.expiryLabel': 'Važi do',
+  'pay.card.cvcLabel': 'CVC / CVV',
+  'pay.card.secure': 'Bezbedna, šifrovana veza',
+  'pay.card.payNow': 'Plati karticom',
+  'pay.card.processing': 'Obrada plaćanja…',
   'pay.card.note':
     'U produkciji se ovde povezuje zvanični kartični ili bankarski procesor; prototip upisuje potvrđenu uplatu u bazu.',
   'pay.connect.title': 'Povežite novčanik za plaćanje',
@@ -759,6 +781,8 @@ const srLatin: Record<string, string> = {
   'pay.receipt.note':
     'Potvrda se čuva lokalno i u backend-u. Blockchain uplate mogu javno da se provere na Solana Exploreru.',
   'pay.alreadyPaid': 'Ova kazna je već plaćena.',
+  'pay.receipt.downloadPdf': 'Preuzmi PDF potvrdu',
+  'pay.receipt.pdfGenerating': 'Generiše se PDF…',
 
   'faq.home.title': 'Često postavljana pitanja',
   'faq.home.q1': 'Šta je Safe City?',
@@ -948,11 +972,17 @@ const sr: Record<string, string> = {
   'pay.rateNote': 'Демо курс: 1 SOL = 190.000 дин. (100.000 MKD, Solana devnet)',
   'pay.method.card': 'Картица / банка',
   'pay.method.crypto': 'Крипто',
-  'pay.card.title': 'Плаћање без крипта',
+  'pay.card.title': 'Плаћање картицом',
   'pay.card.body':
     'Плаћање се евидентира преко бекенда и Supabase базе као званични запис некрипто уплате.',
-  'pay.card.payNow': 'Плати без крипта',
-  'pay.card.processing': 'Евидентира се уплата…',
+  'pay.card.nameLabel': 'Власник картице',
+  'pay.card.namePlaceholder': 'Иван Петровски',
+  'pay.card.numberLabel': 'Број картице',
+  'pay.card.expiryLabel': 'Важи до',
+  'pay.card.cvcLabel': 'CVC / CVV',
+  'pay.card.secure': 'Безбедна, шифрована веза',
+  'pay.card.payNow': 'Плати картицом',
+  'pay.card.processing': 'Обрада плаћања…',
   'pay.card.note':
     'У продукцији се овде повезује званични картично-банкарски процесор; прототип уписује потврђену уплату у базу.',
   'pay.connect.title': 'Повежите новчаник за плаћање',
@@ -992,6 +1022,8 @@ const sr: Record<string, string> = {
   'pay.receipt.note':
     'Потврда се чува локално и у бекенду. Блокчејн уплате могу јавно да се провере на Solana Explorer-у.',
   'pay.alreadyPaid': 'Ова казна је већ плаћена.',
+  'pay.receipt.downloadPdf': 'Преузми PDF потврду',
+  'pay.receipt.pdfGenerating': 'Генерише се PDF…',
 
   'appeal.title': 'Поднеси приговор',
   'appeal.subtitle': 'Генериши формални приговор + PDF документ за преузимање.',

@@ -111,17 +111,23 @@ The portal can read from Supabase through the backend. Four demonstration record
 also bundled and can be seeded to Supabase. Enter any of these codes — the first one
 matches the example SMS:
 
-| Code | Violation |
-|------|-----------|
-| `SC-8F3A2B91C7D4` | Speeding — Партизанска, Скопје |
-| `SC-2E7D9A4F1B60` | Running a red light — Бул. Илинден |
-| `SC-5C1B8E3A9F22` | Expired registration — Бул. Кузман Ј. Питу |
-| `SC-9A4D2F8E1C36` | Illegal parking — Плоштад Македонија |
-| `SC-A1B2C3D4E5F6` | Speeding up to 20 km/h over — Бул. Србија |
-| `SC-B7C8D9E0F1A2` | Speeding 30-50 km/h over — Бул. Борис Трајковски |
-| `SC-C3D4E5F6A7B8` | Speeding more than 50 km/h over — Бул. Александар Македонски |
-| `SC-D9E8F7A6B5C4` | Obstructing illegal parking — Ул. Димитрие Чуповски |
-| `SC-E1F2A3B4C5D6` | Disabled-space illegal parking — Кеј 13 Ноември |
+| Code | Violation | Discount |
+|------|-----------|----------|
+| `SC-8F3A2B91C7D4` | Speeding — Партизанска, Скопје | active |
+| `SC-2E7D9A4F1B60` | Running a red light — Бул. Илинден, Скопје | active |
+| `SC-5C1B8E3A9F22` | Expired registration — Бул. Кузман Ј. Питу, Скопје | active |
+| `SC-9A4D2F8E1C36` | Illegal parking — Плоштад Македонија, Скопје | active |
+| `SC-A1B2C3D4E5F6` | Speeding up to 20 km/h over — Бул. Србија, Скопје | active |
+| `SC-B7C8D9E0F1A2` | Speeding 30-50 km/h over — Бул. Борис Трајковски, Скопје | active |
+| `SC-C3D4E5F6A7B8` | Speeding 50+ km/h over — Бул. Александар Македонски, Скопје | active |
+| `SC-D9E8F7A6B5C4` | Obstructing parking — Ул. Димитрие Чуповски, Скопје | active |
+| `SC-E1F2A3B4C5D6` | Disabled-space parking — Кеј 13 Ноември, Скопје | active |
+| `SC-F2A3B4C5D6E7` | Speeding — Кеј Маршал Тито, **Охрид** | active |
+| `SC-1C2D3E4F5A6B` | Red light + ban — Бул. 1 Мај, **Битола** | **expired** |
+| `SC-3A4B5C6D7E8F` | Expired registration — Ул. Индустриска, **Куманово** | **expired** |
+| `SC-6B7C8D9E0F1A` | Disabled-space parking — Бул. Илинден, **Тетово** | active |
+| `SC-7C8D9E0F1A2B` | Heavy speeding on A1 — **Велес** | active |
+| `SC-8D9E0F1A2B3C` | 50+ km/h over + points — Ул. Кичевска, **Гостивар** | **expired** |
 
 (They are also listed under "Демо кодови" on the home screen.)
 

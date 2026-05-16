@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useLang } from '../i18n/LangContext';
 import { VIOLATIONS } from '../data/violations';
 import {
@@ -16,9 +16,70 @@ interface Props {
   error: string | null;
 }
 
+const TYPEWRITER_CODES = [
+  'SC-8F3A2B91C7D4',
+  'SC-F2A3B4C5D6E7',
+  'SC-7C8D9E0F1A2B',
+];
+
 export function CodeInput({ onSubmit, loading, error }: Props) {
   const { t } = useLang();
   const [value, setValue] = useState('');
+  const [isAnimating, setIsAnimating] = useState(true);
+  const cancelRef = useRef(false);
+
+  useEffect(() => {
+    if (!isAnimating) return;
+    cancelRef.current = false;
+
+    let codeIdx = 0;
+    let charIdx = 0;
+    let deleting = false;
+    let tid: ReturnType<typeof setTimeout>;
+
+    const step = () => {
+      if (cancelRef.current) return;
+      const code = TYPEWRITER_CODES[codeIdx];
+      if (!deleting) {
+        charIdx++;
+        setValue(code.slice(0, charIdx));
+        if (charIdx === code.length) {
+          deleting = true;
+          tid = setTimeout(step, 1600);
+        } else {
+          tid = setTimeout(step, 90);
+        }
+      } else {
+        charIdx--;
+        setValue(code.slice(0, charIdx));
+        if (charIdx === 0) {
+          deleting = false;
+          codeIdx = (codeIdx + 1) % TYPEWRITER_CODES.length;
+          tid = setTimeout(step, 400);
+        } else {
+          tid = setTimeout(step, 45);
+        }
+      }
+    };
+
+    tid = setTimeout(step, 900);
+    return () => {
+      clearTimeout(tid);
+      cancelRef.current = true;
+    };
+  }, [isAnimating]);
+
+  const stopAnimation = () => {
+    if (!isAnimating) return;
+    cancelRef.current = true;
+    setIsAnimating(false);
+    setValue('');
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    stopAnimation();
+    setValue(e.target.value.toUpperCase());
+  };
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -49,14 +110,21 @@ export function CodeInput({ onSubmit, loading, error }: Props) {
             id="code"
             name="code"
             value={value}
-            onChange={(e) => setValue(e.target.value.toUpperCase())}
+            onChange={handleChange}
+            onFocus={stopAnimation}
+            onKeyDown={stopAnimation}
             placeholder={t('code.placeholder')}
             spellCheck={false}
             autoComplete="off"
             autoCapitalize="characters"
             aria-invalid={error ? true : undefined}
             aria-describedby={error ? 'code-error' : 'code-help'}
-            className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3.5 font-mono text-lg tracking-[0.12em] text-slate-900 outline-none transition-colors duration-150 placeholder:tracking-normal placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-200"
+            className={[
+              'w-full rounded-xl border bg-slate-50 px-4 py-3.5 font-mono text-lg tracking-[0.12em] text-slate-900 outline-none transition-colors duration-150 placeholder:tracking-normal placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-200',
+              isAnimating && value
+                ? 'border-blue-400 bg-white ring-2 ring-blue-100'
+                : 'border-slate-300',
+            ].join(' ')}
           />
           <button
             type="submit"
@@ -103,6 +171,7 @@ export function CodeInput({ onSubmit, loading, error }: Props) {
                   key={v.code}
                   type="button"
                   onClick={() => {
+                    stopAnimation();
                     setValue(v.code);
                     if (!loading) onSubmit(v.code);
                   }}

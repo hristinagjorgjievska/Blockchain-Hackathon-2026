@@ -19,6 +19,7 @@ import { formatDate, formatDateTime, formatEUR, formatMKD, formatSOL, shortId } 
 import { savePayment, type PaymentRecord } from '../lib/paymentStore';
 import { FAUCET_URL, explorerTxUrl, mkdToSol } from '../solana/config';
 import { PayError, payFine } from '../solana/payment';
+import { buildReceiptPdf } from '../lib/receiptPdf';
 import {
   IconAlert,
   IconBolt,
@@ -33,6 +34,15 @@ import {
 
 type Status = 'idle' | 'preparing' | 'confirming' | 'saving' | 'error';
 type PaymentMethod = 'non_crypto' | 'crypto';
+
+function IcDownload({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className={className}>
+      <path strokeLinecap="round" strokeLinejoin="round"
+        d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+    </svg>
+  );
+}
 
 interface Props {
   violation: Violation;
@@ -147,6 +157,29 @@ export function PaymentPanel({ violation, fingerprint, paid, onPaid }: Props) {
   const [decryptedMemo, setDecryptedMemo] = useState<DecryptedMemoPayload | null>(null);
   const [memoDecrypting, setMemoDecrypting] = useState(false);
   const [memoDecryptError, setMemoDecryptError] = useState(false);
+  const [pdfLoading, setPdfLoading] = useState(false);
+
+  // Card form fields
+  const [cardName, setCardName] = useState('');
+  const [cardNumber, setCardNumber] = useState('');
+  const [cardExpiry, setCardExpiry] = useState('');
+  const [cardCvc, setCardCvc] = useState('');
+
+  const handleCardNumber = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const digits = e.target.value.replace(/\D/g, '').slice(0, 16);
+    setCardNumber(digits.replace(/(\d{4})(?=\d)/g, '$1 '));
+  };
+
+  const handleExpiry = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value.replace(/\D/g, '').slice(0, 4);
+    setCardExpiry(raw.length <= 2 ? raw : `${raw.slice(0, 2)}/${raw.slice(2)}`);
+  };
+
+  const cardValid =
+    cardName.trim().length > 0 &&
+    cardNumber.replace(/\s/g, '').length === 16 &&
+    /^\d{2}\/\d{2}$/.test(cardExpiry) &&
+    cardCvc.length >= 3;
 
   const amountMKD = amountDueNowMKD(violation);
   const amountSol = mkdToSol(amountMKD);
@@ -246,6 +279,24 @@ export function PaymentPanel({ violation, fingerprint, paid, onPaid }: Props) {
     navigator.clipboard?.writeText(value);
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
+  };
+
+  const handleDownloadReceipt = async () => {
+    if (!paid) return;
+    setPdfLoading(true);
+    try {
+      const blob = await buildReceiptPdf(violation, paid);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `potvrda-${violation.refId}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Receipt PDF generation failed:', err);
+    } finally {
+      setPdfLoading(false);
+    }
   };
 
   const handleDecryptMemo = async (memo: string) => {
@@ -393,6 +444,21 @@ export function PaymentPanel({ violation, fingerprint, paid, onPaid }: Props) {
               {t('common.explorer')}
             </a>
           )}
+          {paidMethod === 'non_crypto' && (
+            <button
+              type="button"
+              onClick={handleDownloadReceipt}
+              disabled={pdfLoading}
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-b from-slate-700 to-slate-800 px-4 py-3 font-semibold text-white transition duration-150 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 active:translate-y-px disabled:cursor-wait disabled:opacity-70"
+            >
+              {pdfLoading ? (
+                <IconSpinner className="h-4 w-4 animate-spin" />
+              ) : (
+                <IcDownload className="h-4 w-4" />
+              )}
+              {pdfLoading ? t('pay.receipt.pdfGenerating') : t('pay.receipt.downloadPdf')}
+            </button>
+          )}
           <p className="text-xs leading-relaxed text-slate-500">{t('pay.receipt.note')}</p>
         </div>
       </section>
@@ -462,19 +528,91 @@ export function PaymentPanel({ violation, fingerprint, paid, onPaid }: Props) {
         </div>
 
         {method === 'non_crypto' ? (
-          <div className="mt-4 rounded-xl border border-slate-200 bg-white p-4">
-            <div className="flex items-start gap-3">
-              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100">
+          <div className="mt-4 space-y-3 rounded-xl border border-slate-200 bg-white p-4">
+            <div className="flex items-center gap-2.5">
+              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100">
                 <IconCard className="h-5 w-5" />
               </span>
+              <div className="font-display font-bold text-slate-900">{t('pay.card.title')}</div>
+            </div>
+
+            <div className="space-y-2.5">
               <div>
-                <div className="font-display font-bold text-slate-900">{t('pay.card.title')}</div>
-                <p className="mt-1 text-sm leading-relaxed text-slate-500">{t('pay.card.body')}</p>
+                <label className="mb-1 block text-xs font-semibold text-slate-600">
+                  {t('pay.card.nameLabel')}
+                </label>
+                <input
+                  type="text"
+                  value={cardName}
+                  onChange={(e) => setCardName(e.target.value)}
+                  placeholder={t('pay.card.namePlaceholder')}
+                  disabled={busy}
+                  autoComplete="cc-name"
+                  className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 disabled:opacity-60"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-slate-600">
+                  {t('pay.card.numberLabel')}
+                </label>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={cardNumber}
+                  onChange={handleCardNumber}
+                  placeholder="1234 5678 9012 3456"
+                  maxLength={19}
+                  disabled={busy}
+                  autoComplete="cc-number"
+                  className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 font-mono text-sm text-slate-800 placeholder-slate-400 tracking-wider focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 disabled:opacity-60"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-2.5">
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-slate-600">
+                    {t('pay.card.expiryLabel')}
+                  </label>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={cardExpiry}
+                    onChange={handleExpiry}
+                    placeholder="MM/YY"
+                    maxLength={5}
+                    disabled={busy}
+                    autoComplete="cc-exp"
+                    className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 font-mono text-sm text-slate-800 placeholder-slate-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 disabled:opacity-60"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-slate-600">
+                    {t('pay.card.cvcLabel')}
+                  </label>
+                  <input
+                    type="password"
+                    inputMode="numeric"
+                    value={cardCvc}
+                    onChange={(e) => setCardCvc(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                    placeholder="•••"
+                    maxLength={4}
+                    disabled={busy}
+                    autoComplete="cc-csc"
+                    className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 font-mono text-sm text-slate-800 placeholder-slate-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 disabled:opacity-60"
+                  />
+                </div>
               </div>
             </div>
 
+            <div className="flex items-center gap-1.5 text-[11px] text-slate-400">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-3.5 w-3.5 shrink-0">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg>
+              {t('pay.card.secure')}
+            </div>
+
             {status === 'error' && errKind && (
-              <div className="mt-3 flex gap-2 rounded-xl border border-red-200 bg-red-50 p-3">
+              <div className="flex gap-2 rounded-xl border border-red-200 bg-red-50 p-3">
                 <IconAlert className="mt-0.5 h-4 w-4 shrink-0 text-red-600" />
                 <p className="text-sm font-medium text-red-700">{t(`pay.err.${errKind}`)}</p>
               </div>
@@ -483,8 +621,8 @@ export function PaymentPanel({ violation, fingerprint, paid, onPaid }: Props) {
             <button
               type="button"
               onClick={handleNonCryptoPay}
-              disabled={busy}
-              className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-b from-emerald-600 to-emerald-700 px-4 py-3.5 font-bold text-white shadow-[0_12px_28px_-10px_rgba(5,150,105,0.85)] transition duration-150 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 focus-visible:ring-offset-2 active:translate-y-px disabled:cursor-wait disabled:opacity-75"
+              disabled={busy || !cardValid}
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-b from-emerald-600 to-emerald-700 px-4 py-3.5 font-bold text-white shadow-[0_12px_28px_-10px_rgba(5,150,105,0.85)] transition duration-150 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 focus-visible:ring-offset-2 active:translate-y-px disabled:cursor-wait disabled:opacity-75"
             >
               {status === 'saving' ? (
                 <IconSpinner className="h-5 w-5 animate-spin" />
@@ -493,7 +631,7 @@ export function PaymentPanel({ violation, fingerprint, paid, onPaid }: Props) {
               )}
               {status === 'saving' ? t('pay.card.processing') : t('pay.card.payNow')}
             </button>
-            <p className="mt-3 text-xs leading-relaxed text-slate-500">{t('pay.card.note')}</p>
+            <p className="text-xs leading-relaxed text-slate-400">{t('pay.card.note')}</p>
           </div>
         ) : !connected ? (
           <div className="mt-4 rounded-xl border border-dashed border-slate-300 bg-slate-50/60 p-4 text-center">
