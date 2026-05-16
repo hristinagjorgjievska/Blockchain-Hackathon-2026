@@ -165,73 +165,301 @@ function dataUrlToBytes(dataUrl: string): Uint8Array {
 async function buildPdf(appealText: string, v: Violation, images: string[] = []): Promise<Blob> {
   const { PDFDocument, rgb } = await import('pdf-lib');
   const fontkit = await import('@pdf-lib/fontkit');
-  
+
   const doc = await PDFDocument.create();
   doc.registerFontkit(fontkit.default);
-  let page = doc.addPage([595.28, 841.89]); // A4 size in points
-  
-  const PW = 595.28;
-  const ML = 70.87;
-  const MR = 40;
+
+  const PAGE_SIZE: [number, number] = [595.28, 841.89]; // A4 size in points
+  const [PW, PH] = PAGE_SIZE;
+  const ML = 64;
+  const MR = 48;
   const TW = PW - ML - MR;
-  
-  const NAVY = rgb(13/255, 51/255, 99/255);
-  const LGRAY = rgb(140/255, 140/255, 140/255);
-  const BLACK = rgb(30/255, 30/255, 30/255);
+  const BOTTOM = 76;
+
+  const NAVY = rgb(10/255, 31/255, 60/255);
+  const BLUE = rgb(37/255, 99/255, 235/255);
+  const INK = rgb(15/255, 23/255, 42/255);
+  const MUTED = rgb(100/255, 116/255, 139/255);
+  const LGRAY = rgb(148/255, 163/255, 184/255);
+  const BORDER = rgb(203/255, 213/255, 225/255);
+  const SURFACE = rgb(248/255, 250/255, 252/255);
+  const PALE_BLUE = rgb(239/255, 246/255, 255/255);
   const WHITE = rgb(1, 1, 1);
-  
-  let y = 800;
-  
+
+  let page = doc.addPage(PAGE_SIZE);
+  let y = PH - 128;
+
   const fontData = await fetch('/fonts/NotoSans.ttf').then(r => r.arrayBuffer());
   const font = await doc.embedFont(new Uint8Array(fontData));
-  
-  page.drawRectangle({
-    x: 0,
-    y: y - 40,
-    width: PW,
-    height: 40,
+
+  type PdfPage = typeof page;
+  type PdfColor = ReturnType<typeof rgb>;
+  type EmbeddedImage = Awaited<ReturnType<typeof doc.embedPng>>;
+
+  let logoImage: EmbeddedImage | null = null;
+  try {
+    const logoBytes = await fetch('/mvr.png').then((r) => {
+      if (!r.ok) throw new Error('Logo not found');
+      return r.arrayBuffer();
+    });
+    logoImage = await doc.embedPng(new Uint8Array(logoBytes));
+  } catch {
+    logoImage = null;
+  }
+
+  const now = new Date();
+
+  const drawLogo = (targetPage: PdfPage, x: number, yPos: number, size: number) => {
+    targetPage.drawRectangle({
+      x,
+      y: yPos,
+      width: size,
+      height: size,
+      color: WHITE,
+      borderColor: BORDER,
+      borderWidth: 0.6,
+    });
+
+    if (logoImage) {
+      const ratio = logoImage.width / logoImage.height;
+      const padding = size * 0.12;
+      const maxSize = size - padding * 2;
+      const drawW = ratio >= 1 ? maxSize : maxSize * ratio;
+      const drawH = ratio >= 1 ? maxSize / ratio : maxSize;
+      targetPage.drawImage(logoImage, {
+        x: x + (size - drawW) / 2,
+        y: yPos + (size - drawH) / 2,
+        width: drawW,
+        height: drawH,
+      });
+      return;
+    }
+
+    targetPage.drawText('МВР', {
+      x: x + size * 0.2,
+      y: yPos + size * 0.42,
+      size: size * 0.22,
+      color: NAVY,
+      font,
+    });
+  };
+
+  const drawFullHeader = (targetPage: PdfPage) => {
+    targetPage.drawRectangle({ x: 0, y: PH - 98, width: PW, height: 98, color: NAVY });
+    targetPage.drawRectangle({ x: 0, y: PH - 102, width: PW, height: 4, color: BLUE });
+    drawLogo(targetPage, ML, PH - 74, 48);
+
+    targetPage.drawText('МИНИСТЕРСТВО ЗА ВНАТРЕШНИ РАБОТИ', {
+      x: ML + 64,
+      y: PH - 39,
+      size: 11,
+      color: WHITE,
+      font,
+    });
+    targetPage.drawText('Safe City MK | службен систем за сообраќајна безбедност', {
+      x: ML + 64,
+      y: PH - 57,
+      size: 8.5,
+      color: rgb(219/255, 234/255, 254/255),
+      font,
+    });
+    targetPage.drawText('ОФИЦИЈАЛЕН НАЦРТ', {
+      x: PW - MR - 96,
+      y: PH - 39,
+      size: 8,
+      color: rgb(191/255, 219/255, 254/255),
+      font,
+    });
+  };
+
+  const drawCompactHeader = (targetPage: PdfPage) => {
+    targetPage.drawRectangle({ x: 0, y: PH - 40, width: PW, height: 40, color: NAVY });
+    drawLogo(targetPage, ML, PH - 34, 24);
+    targetPage.drawText('Safe City MK | МВР', {
+      x: ML + 36,
+      y: PH - 24,
+      size: 8.5,
+      color: WHITE,
+      font,
+    });
+    targetPage.drawText(v.refId, {
+      x: PW - MR - 84,
+      y: PH - 24,
+      size: 8,
+      color: rgb(219/255, 234/255, 254/255),
+      font,
+    });
+  };
+
+  const drawFooter = (targetPage: PdfPage, pageNumber: number, pageCount: number) => {
+    targetPage.drawLine({
+      start: { x: ML, y: 52 },
+      end: { x: PW - MR, y: 52 },
+      thickness: 0.4,
+      color: BORDER,
+    });
+    targetPage.drawText(
+      `Генерирано на ${now.toLocaleDateString('mk-MK')} преку Safe City платформата на МВР.`,
+      { x: ML, y: 32, size: 7.5, color: MUTED, font }
+    );
+    targetPage.drawText(`${pageNumber}/${pageCount}`, {
+      x: PW - MR - 20,
+      y: 32,
+      size: 7.5,
+      color: MUTED,
+      font,
+    });
+  };
+
+  const startNewPage = (sectionTitle?: string) => {
+    page = doc.addPage(PAGE_SIZE);
+    drawCompactHeader(page);
+    y = PH - 72;
+
+    if (sectionTitle) {
+      page.drawText(sectionTitle.toUpperCase(), {
+        x: ML,
+        y,
+        size: 13,
+        color: NAVY,
+        font,
+      });
+      page.drawLine({
+        start: { x: ML, y: y - 10 },
+        end: { x: PW - MR, y: y - 10 },
+        thickness: 0.8,
+        color: BLUE,
+      });
+      y -= 34;
+    }
+  };
+
+  const ensureSpace = (height: number) => {
+    if (y - height < BOTTOM) startNewPage();
+  };
+
+  const drawSectionTitle = (label: string) => {
+    ensureSpace(30);
+    page.drawText(label.toUpperCase(), {
+      x: ML,
+      y,
+      size: 9,
+      color: BLUE,
+      font,
+    });
+    page.drawLine({
+      start: { x: ML, y: y - 8 },
+      end: { x: PW - MR, y: y - 8 },
+      thickness: 0.5,
+      color: BORDER,
+    });
+    y -= 26;
+  };
+
+  const drawWrappedText = (
+    text: string,
+    options: {
+      x?: number;
+      width?: number;
+      size?: number;
+      lineHeight?: number;
+      color?: PdfColor;
+      indent?: number;
+    } = {}
+  ) => {
+    const size = options.size ?? 10;
+    const lineHeight = options.lineHeight ?? 15;
+    const x = options.x ?? ML;
+    const width = options.width ?? TW;
+    const indent = options.indent ?? 0;
+    const maxChars = Math.max(22, Math.floor(width / (size * 0.54)));
+    const lines = wrapText(text, maxChars);
+
+    for (const line of lines) {
+      ensureSpace(lineHeight + 2);
+      page.drawText(line, {
+        x: x + indent,
+        y,
+        size,
+        color: options.color ?? INK,
+        font,
+      });
+      y -= lineHeight;
+    }
+  };
+
+  const drawCallout = (text: string) => {
+    const maxChars = Math.floor(TW / (9.5 * 0.54));
+    const lines = wrapText(text, maxChars);
+    const boxHeight = lines.length * 13 + 22;
+    ensureSpace(boxHeight + 8);
+
+    page.drawRectangle({
+      x: ML - 10,
+      y: y - boxHeight + 7,
+      width: TW + 20,
+      height: boxHeight,
+      color: PALE_BLUE,
+      borderColor: rgb(191/255, 219/255, 254/255),
+      borderWidth: 0.6,
+    });
+
+    let lineY = y - 12;
+    for (const line of lines) {
+      page.drawText(line, {
+        x: ML + 4,
+        y: lineY,
+        size: 9.5,
+        color: NAVY,
+        font,
+      });
+      lineY -= 13;
+    }
+
+    y -= boxHeight + 8;
+  };
+
+  drawFullHeader(page);
+
+  page.drawText('ПРИГОВОР ЗА СООБРАЌАЕН ПРЕКРШОК', {
+    x: ML,
+    y,
+    size: 18,
     color: NAVY,
-  });
-  
-  page.drawText('МИНИСТЕРСТВО ЗА ВНАТРЕШНИ РАБОТИ  |  SAFE CITY', {
-    x: PW / 2 - 150,
-    y: y - 32,
-    size: 10,
-    color: WHITE,
     font,
   });
-  
-  y -= 60;
-  
-  page.drawText('ПРИГОВОР', {
-    x: PW / 2 - 60,
-    y: y,
-    size: 24,
-    color: NAVY,
-    font,
-  });
-  
-  y -= 15;
-  
   page.drawText(`Референтен број: ${v.refId}`, {
-    x: PW / 2 - 80,
-    y: y,
-    size: 10,
-    color: LGRAY,
+    x: ML,
+    y: y - 20,
+    size: 9,
+    color: MUTED,
     font,
   });
-  
-  y -= 15;
-  
-  page.drawLine({
-    start: { x: ML, y: y },
-    end: { x: PW - MR, y: y },
-    thickness: 1,
-    color: NAVY,
+  page.drawRectangle({
+    x: PW - MR - 126,
+    y: y - 25,
+    width: 126,
+    height: 34,
+    color: SURFACE,
+    borderColor: BORDER,
+    borderWidth: 0.6,
   });
-  
-  y -= 15;
-  
+  page.drawText('СТАТУС НА ДОКУМЕНТ', {
+    x: PW - MR - 116,
+    y: y - 4,
+    size: 6.8,
+    color: MUTED,
+    font,
+  });
+  page.drawText('НАЦРТ ЗА ПОДНЕСУВАЊЕ', {
+    x: PW - MR - 116,
+    y: y - 18,
+    size: 8,
+    color: NAVY,
+    font,
+  });
+  y -= 58;
+
   const rows: [string, string][] = [
     ['Код:', v.code],
     ['Датум и час:', new Date(v.dateTime).toLocaleString('mk-MK')],
@@ -244,154 +472,146 @@ async function buildPdf(appealText: string, v: Violation, images: string[] = [])
     ['Казна:', `${amountDueNowMKD(v).toLocaleString('mk-MK')} МКД`],
     ['Рок:', new Date(v.dueDate).toLocaleDateString('mk-MK')],
   ];
-  
-  for (const [label, val] of rows) {
-    page.drawText(label, {
-      x: ML,
-      y: y,
-      size: 10,
-      color: BLACK,
-      font,
-    });
-    
-    page.drawText(val, {
-      x: ML + 140,
-      y: y,
-      size: 10,
-      color: BLACK,
-      font,
-    });
-    
-    y -= 18;
-  }
-  
-  y -= 12;
-  
-  page.drawLine({
-    start: { x: ML, y: y },
-    end: { x: PW - MR, y: y },
-    thickness: 0.5,
-    color: rgb(210/255, 210/255, 210/255),
+
+  const tableHeight = 42 + rows.length * 19;
+  page.drawRectangle({
+    x: ML - 10,
+    y: y - tableHeight,
+    width: TW + 20,
+    height: tableHeight,
+    color: SURFACE,
+    borderColor: BORDER,
+    borderWidth: 0.7,
   });
-  
-  y -= 20;
- 
+  page.drawRectangle({
+    x: ML - 10,
+    y: y - tableHeight,
+    width: 4,
+    height: tableHeight,
+    color: BLUE,
+  });
+  page.drawText('ПОДАТОЦИ ЗА ПРЕКРШОЧНИОТ НАЛОГ', {
+    x: ML + 8,
+    y: y - 18,
+    size: 9,
+    color: NAVY,
+    font,
+  });
+
+  let rowY = y - 42;
+  for (const [label, val] of rows) {
+    page.drawText(label.replace(':', ''), {
+      x: ML + 8,
+      y: rowY,
+      size: 10,
+      color: MUTED,
+      font,
+    });
+
+    page.drawText(val, {
+      x: ML + 142,
+      y: rowY,
+      size: 10,
+      color: INK,
+      font,
+    });
+
+    rowY -= 19;
+  }
+
+  y -= tableHeight + 28;
+  drawSectionTitle('Содржина на приговорот');
+
   const paragraphs = appealText.split('\n').map(p => p.trim()).filter(Boolean);
-  
+
   for (const para of paragraphs) {
-    if (y < 80) {
-      page = doc.addPage([595.28, 841.89]);
-      y = 800;
+    if (para.startsWith('Предмет:')) {
+      drawCallout(para);
+      continue;
     }
-    
-    const wrappedPara = wrapText(para, 60);
-    
-    for (const line of wrappedPara) {
-      if (y < 80) {
-        page = doc.addPage([595.28, 841.89]);
-        y = 800;
-      }
-      
-      page.drawText(line, {
+
+    if (para === 'ОБРАЗЛОЖЕНИЕ:') {
+      ensureSpace(22);
+      page.drawText('ОБРАЗЛОЖЕНИЕ', {
         x: ML,
-        y: y,
-        size: 10,
-        color: BLACK,
+        y,
+        size: 10.5,
+        color: NAVY,
         font,
       });
-      
-      y -= 15;
+      y -= 20;
+      continue;
     }
-    
+
+    if (/^\d+\./.test(para)) {
+      drawWrappedText(para, { x: ML + 14, width: TW - 14, size: 10, lineHeight: 15, color: INK });
+    } else {
+      drawWrappedText(para, { size: 10.2, lineHeight: 15.5, color: INK });
+    }
     y -= 5;
   }
-  
-  y -= 25;
-  if (y < 80) {
-    page = doc.addPage([595.28, 841.89]);
-    y = 800;
-  }
-  
+
+  y -= 18;
+  ensureSpace(78);
+
   page.drawLine({
-    start: { x: ML, y: y },
-    end: { x: ML + 150, y: y },
-    thickness: 0.5,
+    start: { x: ML, y },
+    end: { x: ML + 156, y },
+    thickness: 0.6,
     color: LGRAY,
   });
-  
+
   page.drawLine({
-    start: { x: PW - MR - 150, y: y },
-    end: { x: PW - MR, y: y },
-    thickness: 0.5,
+    start: { x: PW - MR - 156, y },
+    end: { x: PW - MR, y },
+    thickness: 0.6,
     color: LGRAY,
   });
-  
+
   y -= 15;
-  
+
   page.drawText('Потпис на подносителот', {
     x: ML,
-    y: y,
+    y,
     size: 8,
-    color: LGRAY,
+    color: MUTED,
     font,
   });
-  
+
   page.drawText('Службено лице / Печат', {
-    x: PW - MR - 150,
-    y: y,
+    x: PW - MR - 156,
+    y,
     size: 8,
-    color: LGRAY,
+    color: MUTED,
     font,
   });
-  
-  page.drawText(
-    `Документот е генериран на ${new Date().toLocaleDateString('mk-MK')} преку Safe City платформата на МВР.`,
-    {
-      x: ML,
-      y: 30,
-      size: 8,
-      color: LGRAY,
-      font,
-    }
-  );
 
   const imagesToAdd = images.slice(0, 5);
-  
+
   if (imagesToAdd.length > 0) {
-    page = doc.addPage([595.28, 841.89]);
-    y = 800;
-    
-    page.drawText('ДОДАТОЦИ - ДОКАЗИ', {
-      x: PW / 2 - 80,
-      y: y,
-      size: 18,
-      color: NAVY,
-      font,
-    });
-    
-    y -= 35;
-    
+    startNewPage('Додатоци - докази');
+
     for (let i = 0; i < imagesToAdd.length; i++) {
       try {
         const imgData = imagesToAdd[i];
-        
+
         if (!imgData || !imgData.includes('data:image')) continue;
-        
+
         const rawBytes = dataUrlToBytes(imgData);
-        
+
         let image;
         if (imgData.includes('jpeg') || imgData.includes('jpg')) {
           image = await doc.embedJpg(rawBytes);
         } else {
           image = await doc.embedPng(rawBytes);
         }
-        
+
         const dims = image.size();
-        const maxW = 420;
-        const maxH = 220;
+        const maxW = TW - 36;
+        const maxH = 240;
         let w = dims.width;
         let h = dims.height;
-        
+
         if (w > maxW) {
           h = (h * maxW) / w;
           w = maxW;
@@ -400,33 +620,54 @@ async function buildPdf(appealText: string, v: Violation, images: string[] = [])
           w = (w * maxH) / h;
           h = maxH;
         }
-        
-        if (y - h < 80) {
-          page = doc.addPage([595.28, 841.89]);
-          y = 800;
-        }
-        
+
+        const cardHeight = h + 62;
+        ensureSpace(cardHeight + 16);
+        const imageTop = y - 34;
+        const imageY = imageTop - h;
+        const cardY = imageY - 22;
+
+        page.drawRectangle({
+          x: ML - 10,
+          y: cardY,
+          width: TW + 20,
+          height: cardHeight,
+          color: WHITE,
+          borderColor: BORDER,
+          borderWidth: 0.7,
+        });
+        page.drawText(`Доказ ${i + 1}`, {
+          x: ML + 4,
+          y: y - 18,
+          size: 10,
+          color: NAVY,
+          font,
+        });
+
         page.drawImage(image, {
           x: ML + (TW - w) / 2,
-          y: y - h,
+          y: imageY,
           width: w,
           height: h,
         });
-        
-        page.drawText(`Доказ ${i + 1}`, {
-          x: ML,
-          y: y - h - 20,
+
+        page.drawText(`Приложен доказ кон приговорот ${v.refId}`, {
+          x: ML + 4,
+          y: cardY + 10,
           size: 8,
-          color: LGRAY,
+          color: MUTED,
           font,
         });
-        
-        y -= h + 40;
+
+        y = cardY - 18;
       } catch {
       }
     }
   }
-  
+
+  const pages = doc.getPages();
+  pages.forEach((pdfPage, index) => drawFooter(pdfPage, index + 1, pages.length));
+
   const pdfBytes = await doc.save({ useObjectStreams: false });
   return new Blob([pdfBytes.slice(0)], { type: 'application/pdf' });
 }
