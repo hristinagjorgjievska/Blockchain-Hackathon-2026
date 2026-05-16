@@ -31,8 +31,17 @@ async function supabaseFetch(config, path, init = {}) {
   return res.json();
 }
 
-export function violationToDb(v, pepper) {
-  return {
+function isMissingColumn(error, column) {
+  return (
+    error instanceof SupabaseError &&
+    error.status === 400 &&
+    (error.message.includes(`'${column}' column`) ||
+      error.message.includes(`violations.${column} does not exist`))
+  );
+}
+
+export function violationToDb(v, pepper, options = {}) {
+  const row = {
     code_hash: codeHash(v.code, pepper),
     ref_id: v.refId,
     kind: v.kind,
@@ -68,13 +77,19 @@ export function violationToDb(v, pepper) {
     legal_note_en: v.legalNote.en,
     legal_note_sr: v.legalNote.sr,
   };
+  if (options.includeDemoFields !== false) {
+    row.demo_code = v.code;
+    row.status = v.status ?? null;
+  }
+  return row;
 }
 
 export function dbToViolation(row, code) {
   return {
-    code,
+    code: code ?? row.demo_code,
     refId: row.ref_id,
     kind: row.kind,
+    status: row.status ?? undefined,
     plate: row.plate,
     vehicleMake: row.vehicle_make,
     carColor: row.car_color,
@@ -145,6 +160,20 @@ export async function selectViolationByCode(config, code) {
   return rows?.[0] ? dbToViolation(rows[0], code) : null;
 }
 
+export async function selectViolations(config) {
+  let rows;
+  try {
+    rows = await supabaseFetch(
+      config,
+      '/violations?demo_code=not.is.null&select=*&order=issued_at.desc',
+    );
+  } catch (error) {
+    if (!isMissingColumn(error, 'demo_code')) throw error;
+    rows = await supabaseFetch(config, '/violations?select=*&order=issued_at.desc');
+  }
+  return rows?.map((row) => dbToViolation(row)) ?? [];
+}
+
 export async function checkDatabase(config) {
   await supabaseFetch(config, '/violations?select=id&limit=1');
   await supabaseFetch(config, '/payments?select=id&limit=1');
@@ -170,12 +199,47 @@ export async function insertPayment(config, code, payment) {
 }
 
 export async function upsertViolations(config, violations) {
-  const rows = await supabaseFetch(config, '/violations?on_conflict=code_hash', {
-    method: 'POST',
-    headers: { Prefer: 'resolution=merge-duplicates,return=representation' },
-    body: JSON.stringify(
-      violations.map((violation) => violationToDb(violation, config.securityCodePepper)),
-    ),
-  });
+  const upsert = (includeDemoFields) =>
+    supabaseFetch(config, '/violations?on_conflict=ref_id', {
+      method: 'POST',
+      headers: { Prefer: 'resolution=merge-duplicates,return=representation' },
+      body: JSON.stringify(
+        violations.map((violation) =>
+          violationToDb(violation, config.securityCodePepper, { includeDemoFields }),
+        ),
+      ),
+    });
+
+  let rows;
+  try {
+    rows = await upsert(true);
+  } catch (error) {
+    if (!isMissingColumn(error, 'demo_code') && !isMissingColumn(error, 'status')) throw error;
+    rows = await upsert(false);
+  }
   return rows ?? [];
+}
+
+export async function deleteViolationsExceptRefs(config, refIds) {
+  const keep = new Set(refIds);
+  const rows = await supabaseFetch(config, '/violations?select=ref_id');
+  const staleRefs = (rows ?? [])
+    .map((row) => row.ref_id)
+    .filter((refId) => !keep.has(refId));
+
+  if (staleRefs.length === 0) return [];
+
+  const deleted = [];
+  for (const refId of staleRefs) {
+    const rowsForRef = await supabaseFetch(
+      config,
+      `/violations?ref_id=eq.${encodeURIComponent(refId)}`,
+      {
+        method: 'DELETE',
+        headers: { Prefer: 'return=representation' },
+      },
+    );
+    deleted.push(...(rowsForRef ?? []));
+  }
+  return deleted;
 }

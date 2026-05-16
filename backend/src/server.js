@@ -10,6 +10,7 @@ import {
   insertPayment,
   selectLatestPayment,
   selectViolationByCode,
+  selectViolations,
 } from './supabase.js';
 
 const config = getConfig();
@@ -57,19 +58,61 @@ function readJson(req) {
 
 async function findViolation(code) {
   if (!isValidCodeFormat(code)) return null;
+  const target = canonicalCode(code);
 
   if (hasSupabase(config)) {
     try {
       const violation = await selectViolationByCode(config, code);
-      if (violation) return violation;
+      if (violation) {
+        const demo = DEMO_VIOLATIONS.find(
+          (v) => v.refId === violation.refId || canonicalCode(v.code) === target,
+        );
+        return demo
+          ? {
+              ...demo,
+              ...violation,
+              code: violation.code ?? demo.code,
+              status: violation.status ?? demo.status,
+            }
+          : violation;
+      }
     } catch (error) {
       console.warn('Supabase violation lookup failed:', error.message);
     }
   }
 
   if (!config.supabaseDemoFallback) return null;
-  const target = canonicalCode(code);
   return DEMO_VIOLATIONS.find((v) => canonicalCode(v.code) === target) ?? null;
+}
+
+function hydrateListedViolation(violation) {
+  const demo = DEMO_VIOLATIONS.find((v) => v.refId === violation.refId);
+  if (demo) {
+    return {
+      ...demo,
+      ...violation,
+      code: violation.code ?? demo.code,
+      status: violation.status ?? demo.status,
+    };
+  }
+  return violation.code ? violation : null;
+}
+
+async function listViolations() {
+  if (hasSupabase(config)) {
+    try {
+      const violations = await selectViolations(config);
+      const listed = violations.map(hydrateListedViolation).filter((violation) => violation?.code);
+      if (listed.length > 0) {
+        return { violations: listed, source: 'supabase' };
+      }
+    } catch (error) {
+      console.warn('Supabase violation list failed:', error.message);
+    }
+  }
+
+  if (!config.supabaseDemoFallback) return { violations: [], source: 'none' };
+  return { violations: DEMO_VIOLATIONS, source: 'demo-fallback' };
 }
 
 function receiptId() {
@@ -189,6 +232,12 @@ async function route(req, res) {
     return;
   }
 
+  if (req.method === 'GET' && (url.pathname === '/api/nfts' || url.pathname === '/api/violations')) {
+    const { violations, source } = await listViolations();
+    send(res, 200, { violations, source });
+    return;
+  }
+
   const violationMatch = url.pathname.match(/^\/api\/violations\/([^/]+)$/);
   if (req.method === 'GET' && violationMatch) {
     const code = decodeURIComponent(violationMatch[1]);
@@ -301,5 +350,5 @@ const server = createServer((req, res) => {
 });
 
 server.listen(config.port, config.host, () => {
-  console.log(`Safe City backend listening on http://${config.host}:${config.port}`);
+  console.log(`SafeChain backend listening on http://${config.host}:${config.port}`);
 });

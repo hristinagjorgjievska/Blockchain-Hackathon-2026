@@ -1,4 +1,4 @@
-import { findViolation, type Violation } from '../data/violations';
+import { VIOLATIONS, findViolation, type Violation } from '../data/violations';
 import type { PaymentRecord } from './paymentStore';
 
 const API_BASE = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '');
@@ -52,10 +52,26 @@ export async function lookupViolation(code: string): Promise<Violation | null> {
     const body = await request<{ violation: Violation }>(
       `/api/violations/${encodeURIComponent(code)}`,
     );
-    return body.violation;
+    const local = findViolation(code);
+    return local
+      ? {
+          ...local,
+          ...body.violation,
+          status: body.violation.status ?? local.status,
+        }
+      : body.violation;
   } catch (error) {
     if (error instanceof ApiError && error.status === 404) return null;
     return findViolation(code) ?? null;
+  }
+}
+
+export async function listNftViolations(): Promise<Violation[]> {
+  try {
+    const body = await request<{ violations: Violation[]; source?: string }>('/api/nfts');
+    return body.violations.length > 0 ? body.violations : VIOLATIONS;
+  } catch {
+    return VIOLATIONS;
   }
 }
 

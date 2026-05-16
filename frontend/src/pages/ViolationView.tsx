@@ -7,10 +7,12 @@ import {
   type Violation,
 } from '../data/violations';
 import { sha256Hex } from '../lib/hash';
-import { getPayment, type PaymentRecord } from '../lib/paymentStore';
+import { getPayment, savePayment, type PaymentRecord } from '../lib/paymentStore';
 import { getRemotePayment, lookupViolation } from '../lib/api';
+import { resolveNftStatus } from '../lib/resolveNftStatus';
+import { getLocalStatus } from '../lib/violationStatusStore';
 import { formatDate, formatDateTime, formatMKD } from '../lib/format';
-import { AuthenticityPanel } from '../components/AuthenticityPanel';
+import { NftRecord } from '../components/NftRecord';
 import { EvidenceGallery } from '../components/EvidenceGallery';
 import { PaymentPanel } from '../components/PaymentPanel';
 import { AppealGenerator } from '../components/AppealGenerator';
@@ -66,6 +68,10 @@ export function ViolationView({
   );
   const [fingerprint, setFingerprint] = useState<string | null>(null);
   const [paid, setPaid] = useState<PaymentRecord | null>(() => getPayment(code));
+  const [paidSubmitted, setPaidSubmitted] = useState(false);
+  const [appealPending, setAppealPending] = useState<boolean>(
+    () => getLocalStatus(code) === 'appeal_pending',
+  );
 
   function calculateDaysRemaining(dueDate: string): number {
     const today = new Date();
@@ -107,13 +113,26 @@ export function ViolationView({
 
   useEffect(() => {
     let alive = true;
+    if (violation === undefined) {
+      return () => {
+        alive = false;
+      };
+    }
+    if (violation?.status === 'unpaid' && !paidSubmitted) {
+      return () => {
+        alive = false;
+      };
+    }
     getRemotePayment(code).then((remote) => {
-      if (alive && remote) setPaid(remote);
+      if (alive && remote) {
+        savePayment(code, remote);
+        setPaid(remote);
+      }
     });
     return () => {
       alive = false;
     };
-  }, [code]);
+  }, [code, violation?.status, paidSubmitted]);
 
   if (violation === undefined) {
     return (
@@ -139,10 +158,177 @@ export function ViolationView({
     );
   }
 
+  const authorityUnpaid = violation.status === 'unpaid' && !paidSubmitted;
+  const statusViolation =
+    paidSubmitted && violation.status === 'unpaid'
+      ? { ...violation, status: undefined }
+      : violation;
+  const effectivePaid = authorityUnpaid ? null : paid;
+  const nftStatus = resolveNftStatus(statusViolation, effectivePaid, appealPending);
+
   const speedValue =
     violation.speedRecorded && violation.speedLimit
       ? `${violation.speedRecorded} / ${violation.speedLimit} km/h`
       : null;
+
+  const violationDetails = (
+    <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+      <h2 className="text-lg font-bold text-slate-900">{t('view.detailsTitle')}</h2>
+      <div className="mt-3 rounded-xl bg-blue-50 p-3 text-sm text-blue-900">
+        <span className="font-bold">{t(`kind.${violation.kind}`)}</span>
+        {' — '}
+        {t(`kind.${violation.kind}.desc`)}
+      </div>
+      <div className="mt-4 grid gap-4 sm:grid-cols-2">
+        <Field
+          icon={<IconCalendar className="h-4 w-4" />}
+          label={t('view.field.datetime')}
+          value={formatDateTime(violation.dateTime, lang)}
+        />
+        <Field
+          icon={<IconPin className="h-4 w-4" />}
+          label={t('view.field.location')}
+          value={`${violation.street[lang]}, ${violation.city[lang]}`}
+        />
+        <Field
+          icon={<IconCar className="h-4 w-4" />}
+          label={t('view.field.vehicle')}
+          value={`${t(`color.${violation.carColor}`)} ${violation.vehicleMake}`}
+        />
+        <Field
+          icon={<IconHash className="h-4 w-4" />}
+          label={t('view.field.plate')}
+          value={violation.plate}
+        />
+        <Field
+          icon={<IconCamera className="h-4 w-4" />}
+          label={t('view.field.camera')}
+          value={violation.cameraId}
+        />
+        {speedValue && (
+          <Field
+            icon={<IconGauge className="h-4 w-4" />}
+            label={t('view.field.speed')}
+            value={speedValue}
+          />
+        )}
+        <Field
+          icon={<IconClock className="h-4 w-4" />}
+          label={t('view.field.issued')}
+          value={formatDateTime(violation.issuedAt, lang)}
+        />
+        <Field
+          icon={<IconCalendar className="h-4 w-4" />}
+          label={t('view.field.due')}
+          value={formatDate(violation.earlyPaymentDeadline, lang)}
+        />
+        <Field
+          icon={<IconScale className="h-4 w-4" />}
+          label={t('view.field.legal')}
+          value={violation.legalNote[lang]}
+        />
+      </div>
+    </section>
+  );
+
+  if (nftStatus === 'voided') {
+    return (
+      <div className="mx-auto max-w-5xl px-4 py-10">
+        <button
+          type="button"
+          onClick={onBack}
+          className="flex items-center gap-1.5 text-sm font-medium text-slate-500 transition hover:text-blue-700"
+        >
+          <IconArrowLeft className="h-4 w-4" />
+          {t('view.back')}
+        </button>
+        <div className="mt-8 flex flex-col items-center gap-10 sm:flex-row sm:items-start sm:gap-16">
+          <div className="min-w-0 flex-1">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-xs font-bold uppercase tracking-widest text-slate-500">
+              <span className="h-1.5 w-1.5 rounded-full bg-slate-400" />
+              {t('nft.status.voided')}
+            </span>
+            <h1 className="mt-4 text-2xl font-bold text-slate-900 sm:text-3xl">{t('view.voided.title')}</h1>
+            <p className="mt-4 leading-relaxed text-slate-600">{t('view.voided.body')}</p>
+            <p className="mt-4 font-mono text-xs text-slate-400">{violation.refId}</p>
+          </div>
+          <div className="shrink-0">
+            <img src="/mvr.png" alt="МВР" className="h-36 w-36 object-contain opacity-80 sm:h-44 sm:w-44" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (nftStatus === 'appeal_pending') {
+    return (
+      <div className="mx-auto max-w-5xl px-4 py-10">
+        <button
+          type="button"
+          onClick={onBack}
+          className="flex items-center gap-1.5 text-sm font-medium text-slate-500 transition hover:text-blue-700"
+        >
+          <IconArrowLeft className="h-4 w-4" />
+          {t('view.back')}
+        </button>
+        <div className="mt-8 flex flex-col items-center gap-10 sm:flex-row sm:items-start sm:gap-16">
+          <div className="min-w-0 flex-1">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1 text-xs font-bold uppercase tracking-widest text-amber-700">
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-500" />
+              {t('nft.status.appeal_pending')}
+            </span>
+            <h1 className="mt-4 text-2xl font-bold text-slate-900 sm:text-3xl">{t('nft.status.appeal_pending')}</h1>
+            <p className="mt-4 leading-relaxed text-slate-600">{t('view.appeal.banner')}</p>
+            <p className="mt-4 font-mono text-xs text-slate-400">{violation.refId}</p>
+          </div>
+          <div className="shrink-0">
+            <img src="/mvr.png" alt="МВР" className="h-36 w-36 object-contain opacity-80 sm:h-44 sm:w-44" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (nftStatus === 'paid') {
+    return (
+      <div className="mx-auto max-w-5xl px-4 py-10">
+        <button
+          type="button"
+          onClick={onBack}
+          className="flex items-center gap-1.5 text-sm font-medium text-slate-500 transition hover:text-blue-700"
+        >
+          <IconArrowLeft className="h-4 w-4" />
+          {t('view.back')}
+        </button>
+
+        <section className="mt-8 rounded-2xl border border-emerald-100 bg-white p-6 shadow-sm sm:p-8">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold uppercase tracking-widest text-emerald-700">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+            {t('nft.status.paid')}
+          </span>
+          <div className="mt-5 flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+            <div className="min-w-0 max-w-2xl">
+              <div className="grid h-12 w-12 place-items-center rounded-xl bg-emerald-100 text-emerald-700">
+                <IconCheck className="h-6 w-6" />
+              </div>
+              <h1 className="mt-4 text-2xl font-bold text-slate-900 sm:text-3xl">
+                {t('view.paid.title')}
+              </h1>
+              <p className="mt-4 leading-relaxed text-slate-600">{t('view.paid.body')}</p>
+              <p className="mt-4 font-mono text-xs text-slate-400">{violation.refId}</p>
+            </div>
+            <img
+              src="/mvr.png"
+              alt="МВР"
+              className="h-24 w-24 shrink-0 object-contain opacity-80 sm:h-32 sm:w-32"
+            />
+          </div>
+        </section>
+
+        <div className="mt-6">{violationDetails}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6">
@@ -164,16 +350,20 @@ export function ViolationView({
             {t('view.title')}
           </h1>
         </div>
-        {paid ? (
-          <span className="flex items-center gap-1 rounded-full bg-emerald-100 px-3 py-1 text-sm font-bold text-emerald-700">
-            <IconCheck className="h-4 w-4" />
-            {t('status.paid')}
-          </span>
-        ) : (
-          <span className="rounded-full bg-red-100 px-3 py-1 text-sm font-bold text-red-700">
-            {t('status.unpaid')}
-          </span>
-        )}
+        {(() => {
+          const cfg = {
+            paid:           { cls: 'bg-emerald-100 text-emerald-700', dot: 'bg-emerald-500' },
+            unpaid:         { cls: 'bg-red-100 text-red-700',         dot: 'bg-red-500'     },
+            voided:         { cls: 'bg-slate-100 text-slate-600',     dot: 'bg-slate-400'   },
+            appeal_pending: { cls: 'bg-amber-100 text-amber-700',     dot: 'bg-amber-500'   },
+          }[nftStatus];
+          return (
+            <span className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-bold ${cfg.cls}`}>
+              <span className={`h-2 w-2 rounded-full ${cfg.dot}`} />
+              {t(`nft.status.${nftStatus}`)}
+            </span>
+          );
+        })()}
         <div className="ml-auto rounded-xl bg-navy px-4 py-2 text-right text-white">
           <div className="text-[10px] font-semibold uppercase tracking-wide text-blue-200">
             {t('view.amountDue')}
@@ -186,67 +376,14 @@ export function ViolationView({
 
       <div className="mt-6 grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
-          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-            <h2 className="text-lg font-bold text-slate-900">{t('view.detailsTitle')}</h2>
-            <div className="mt-3 rounded-xl bg-blue-50 p-3 text-sm text-blue-900">
-              <span className="font-bold">{t(`kind.${violation.kind}`)}</span>
-              {' — '}
-              {t(`kind.${violation.kind}.desc`)}
-            </div>
-            <div className="mt-4 grid gap-4 sm:grid-cols-2">
-              <Field
-                icon={<IconCalendar className="h-4 w-4" />}
-                label={t('view.field.datetime')}
-                value={formatDateTime(violation.dateTime, lang)}
-              />
-              <Field
-                icon={<IconPin className="h-4 w-4" />}
-                label={t('view.field.location')}
-                value={`${violation.street[lang]}, ${violation.city[lang]}`}
-              />
-              <Field
-                icon={<IconCar className="h-4 w-4" />}
-                label={t('view.field.vehicle')}
-                value={`${t(`color.${violation.carColor}`)} ${violation.vehicleMake}`}
-              />
-              <Field
-                icon={<IconHash className="h-4 w-4" />}
-                label={t('view.field.plate')}
-                value={violation.plate}
-              />
-              <Field
-                icon={<IconCamera className="h-4 w-4" />}
-                label={t('view.field.camera')}
-                value={violation.cameraId}
-              />
-              {speedValue && (
-                <Field
-                  icon={<IconGauge className="h-4 w-4" />}
-                  label={t('view.field.speed')}
-                  value={speedValue}
-                />
-              )}
-              <Field
-                icon={<IconClock className="h-4 w-4" />}
-                label={t('view.field.issued')}
-                value={formatDateTime(violation.issuedAt, lang)}
-              />
-              <Field
-                icon={<IconCalendar className="h-4 w-4" />}
-                label={t('view.field.due')}
-                value={formatDate(violation.earlyPaymentDeadline, lang)}
-              />
-              <Field
-                icon={<IconScale className="h-4 w-4" />}
-                label={t('view.field.legal')}
-                value={violation.legalNote[lang]}
-              />
-            </div>
-          </section>
+          {violationDetails}
 
           <EvidenceGallery violation={violation} />
 
-          <AppealGenerator violation={violation} />
+          <AppealGenerator
+            violation={violation}
+            onAppealSubmitted={() => setAppealPending(true)}
+          />
 
           <FAQ
             title={t('faq.violation.title')}
@@ -265,7 +402,12 @@ export function ViolationView({
             ]}
           />
 
-          <AuthenticityPanel fingerprint={fingerprint} />
+          <NftRecord
+            violation={statusViolation}
+            fingerprint={fingerprint}
+            paid={effectivePaid}
+            localAppealPending={appealPending}
+          />
         </div>
 
         <div className="lg:col-span-1">
@@ -273,8 +415,11 @@ export function ViolationView({
             <PaymentPanel
               violation={violation}
               fingerprint={fingerprint}
-              paid={paid}
-              onPaid={setPaid}
+              paid={effectivePaid}
+              onPaid={(record) => {
+                setPaid(record);
+                setPaidSubmitted(true);
+              }}
             />
           </div>
         </div>

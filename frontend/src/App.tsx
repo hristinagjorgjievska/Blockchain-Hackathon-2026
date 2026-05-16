@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { ThirdwebProvider } from 'thirdweb/react';
 import { LangProvider } from './i18n/LangContext';
 import { SolanaProvider } from './solana/SolanaProvider';
 import { Header } from './components/Header';
@@ -66,9 +67,11 @@ function Shell() {
 export default function App() {
   return (
     <LangProvider>
-      <SolanaProvider>
-        <Shell />
-      </SolanaProvider>
+      <ThirdwebProvider>
+        <SolanaProvider>
+          <Shell />
+        </SolanaProvider>
+      </ThirdwebProvider>
     </LangProvider>
   );
 }

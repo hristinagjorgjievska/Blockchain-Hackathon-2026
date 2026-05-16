@@ -6,6 +6,7 @@ import { nodePolyfills } from 'vite-plugin-node-polyfills';
 // node polyfills are required by @solana/web3.js (Buffer) when running in the browser.
 export default defineConfig({
   root: fileURLToPath(new URL('./frontend', import.meta.url)),
+  envDir: fileURLToPath(new URL('.', import.meta.url)),
   publicDir: 'public',
   cacheDir: '../node_modules/.vite',
   plugins: [

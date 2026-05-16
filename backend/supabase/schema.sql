@@ -1,4 +1,4 @@
--- Safe City MK prototype schema.
+-- SafeChain MK prototype schema.
 -- Run this in the Supabase SQL editor, then run `npm run db:seed`.
 -- The permissive policies below are for the hackathon prototype with a publishable key.
 -- For production, keep writes behind the backend with a service role key and tighten RLS.
@@ -7,9 +7,11 @@ create extension if not exists pgcrypto;
 
 create table if not exists public.violations (
   id uuid primary key default gen_random_uuid(),
+  demo_code text,
   code_hash text not null unique,
   ref_id text not null unique,
   kind text not null check (kind in ('speeding', 'red_light', 'expired_registration', 'no_parking')),
+  status text check (status in ('unpaid', 'paid', 'voided', 'appeal_pending')),
   plate text not null,
   vehicle_make text not null,
   car_color text not null,
@@ -44,6 +46,10 @@ create table if not exists public.violations (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table public.violations
+  add column if not exists demo_code text,
+  add column if not exists status text check (status in ('unpaid', 'paid', 'voided', 'appeal_pending'));
 
 create table if not exists public.payments (
   id uuid primary key default gen_random_uuid(),
