@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ConnectButton } from 'thirdweb/react';
 import { inAppWallet, createWallet } from 'thirdweb/wallets';
 import { thirdwebClient } from '../thirdweb/client';
@@ -13,26 +13,75 @@ const WALLETS = [
   createWallet('io.magiceden.wallet'),
 ];
 
+/** Desktop: horizontal button group.  Mobile: native dropdown. */
 function LangToggle({ lang, setLang }: { lang: Lang; setLang: (l: Lang) => void }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  // close on outside click
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [open]);
+
   return (
-    <div className="flex items-center rounded-lg bg-white/10 p-0.5 ring-1 ring-white/10">
-      {LANGS.map((l) => {
-        const active = lang === l;
-        return (
-          <button
-            key={l}
-            type="button"
-            onClick={() => setLang(l)}
-            aria-pressed={active}
-            className={`rounded-md px-2.5 py-1.5 text-xs font-bold uppercase tracking-wide transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 ${
-              active ? 'bg-white text-navy-900 shadow-sm' : 'text-blue-200 hover:text-white'
-            }`}
-          >
-            {LANG_LABELS[l]}
-          </button>
-        );
-      })}
-    </div>
+    <>
+      {/* Desktop: horizontal pill */}
+      <div className="hidden sm:flex items-center rounded-lg bg-white/10 p-0.5 ring-1 ring-white/10">
+        {LANGS.map((l) => {
+          const active = lang === l;
+          return (
+            <button
+              key={l}
+              type="button"
+              onClick={() => setLang(l)}
+              aria-pressed={active}
+              className={`rounded-md px-2.5 py-1.5 text-xs font-bold uppercase tracking-wide transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 ${
+                active ? 'bg-white text-navy-900 shadow-sm' : 'text-blue-200 hover:text-white'
+              }`}
+            >
+              {LANG_LABELS[l]}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Mobile: dropdown */}
+      <div ref={ref} className="relative sm:hidden">
+        <button
+          type="button"
+          onClick={() => setOpen(!open)}
+          className="flex items-center gap-1 rounded-lg bg-white/10 px-2.5 py-1.5 text-xs font-bold uppercase tracking-wide text-white ring-1 ring-white/10 transition-colors"
+        >
+          {LANG_LABELS[lang]}
+          <svg className={`h-3 w-3 transition-transform ${open ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+        {open && (
+          <div className="absolute right-0 top-full z-50 mt-1.5 min-w-[7rem] overflow-hidden rounded-lg border border-white/15 bg-navy-800 shadow-xl ring-1 ring-black/20">
+            {LANGS.map((l) => (
+              <button
+                key={l}
+                type="button"
+                onClick={() => { setLang(l); setOpen(false); }}
+                className={`block w-full px-3.5 py-2 text-left text-xs font-bold uppercase tracking-wide transition-colors ${
+                  lang === l
+                    ? 'bg-white/15 text-white'
+                    : 'text-blue-200 hover:bg-white/10 hover:text-white'
+                }`}
+              >
+                {LANG_LABELS[l]}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    </>
   );
 }
 
@@ -71,10 +120,11 @@ export function Header({ onHome }: { onHome: () => void }) {
               />
             </span>
             <span className="leading-tight">
-              <span className="block font-display text-[15px] font-bold tracking-tight text-white">
-                SafeChain MK
+              <span className="block font-display text-[13px] font-bold tracking-tight text-white sm:text-[15px]">
+                SafeChain<span className="hidden sm:inline"> MK</span>
               </span>
-              <span className="block text-[10.5px] font-medium text-blue-200/80">
+              {/* Hide tagline on mobile */}
+              <span className="hidden text-[10.5px] font-medium text-blue-200/80 sm:block">
                 {t('header.tagline')}
               </span>
             </span>
