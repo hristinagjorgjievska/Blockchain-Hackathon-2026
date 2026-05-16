@@ -3,6 +3,7 @@ import { useLang } from '../i18n/LangContext';
 import { CodeInput } from '../components/CodeInput';
 import { PhishingNotice } from '../components/PhishingNotice';
 import { SmsComparison } from '../components/SmsComparison';
+import { FAQ } from '../components/FAQ';
 import { Reveal } from '../components/Reveal';
 import { isValidCodeFormat, type Violation } from '../data/violations';
 import { lookupViolation } from '../lib/api';
@@ -212,6 +213,21 @@ export function Home({ onFound }: { onFound: (violation: Violation) => void }) {
             <div className="mt-8">
               <SmsComparison />
             </div>
+          </Reveal>
+        </section>
+
+        <section>
+          <Reveal>
+            <FAQ
+              title={t('faq.home.title')}
+              items={[
+                { question: t('faq.home.q1'), answer: t('faq.home.a1') },
+                { question: t('faq.home.q2'), answer: t('faq.home.a2') },
+                { question: t('faq.home.q3'), answer: t('faq.home.a3') },
+                { question: t('faq.home.q4'), answer: t('faq.home.a4') },
+                { question: t('faq.home.q5'), answer: t('faq.home.a5') },
+              ]}
+            />
           </Reveal>
         </section>
       </div>

@@ -14,6 +14,7 @@ import { AuthenticityPanel } from '../components/AuthenticityPanel';
 import { EvidenceGallery } from '../components/EvidenceGallery';
 import { PaymentPanel } from '../components/PaymentPanel';
 import { AppealGenerator } from '../components/AppealGenerator';
+import { FAQ } from '../components/FAQ';
 import {
   IconAlert,
   IconArrowLeft,
@@ -65,6 +66,16 @@ export function ViolationView({
   );
   const [fingerprint, setFingerprint] = useState<string | null>(null);
   const [paid, setPaid] = useState<PaymentRecord | null>(() => getPayment(code));
+
+  function calculateDaysRemaining(dueDate: string): number {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const due = new Date(dueDate);
+    due.setHours(0, 0, 0, 0);
+    const timeDiff = due.getTime() - today.getTime();
+    const daysDiff = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+    return Math.max(0, daysDiff);
+  }
 
   useEffect(() => {
     let alive = true;
@@ -237,6 +248,22 @@ export function ViolationView({
 
           <AppealGenerator violation={violation} />
 
+          <FAQ
+            title={t('faq.violation.title')}
+            items={[
+              {
+                question: t('faq.violation.daysLeftQ'),
+                answer: t('faq.violation.daysLeftA').replace(
+                  '{days}',
+                  calculateDaysRemaining(violation.dueDate).toString()
+                ),
+              },
+              { question: t('faq.violation.disagreeQ'), answer: t('faq.violation.disagreeA') },
+              { question: t('faq.violation.appealQ'), answer: t('faq.violation.appealA') },
+              { question: t('faq.violation.paymentQ'), answer: t('faq.violation.paymentA') },
+              { question: t('faq.violation.evidenceQ'), answer: t('faq.violation.evidenceA') },
+            ]}
+          />
 
           <AuthenticityPanel fingerprint={fingerprint} />
         </div>

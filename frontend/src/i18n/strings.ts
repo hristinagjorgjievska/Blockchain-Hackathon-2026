@@ -236,6 +236,41 @@ const mk: Record<string, string> = {
   'appeal.new': 'Нов приговор',
   'appeal.error': 'Грешка при генерирање на документот. Обидете се повторно или освежете ја страницата.',
 
+  // FAQ - Home page
+  'faq.home.title': 'Често поставувани прашања',
+  'faq.home.q1': 'Што е Safe City?',
+  'faq.home.a1':
+    'Safe City е транспарентен систем за сообраќајни прекршоци кој ви овозможува безбедно да ги проверите вашите казни и да ги платите преку блокчејн. Сите докази и плаќања се запишани на блокчејн.',
+  'faq.home.q2': 'Дали е мојот безбедносен код навистина безбеден?',
+  'faq.home.a2':
+    'Да. Вашиот код се испраќа преку SMS и не содржи линкови. Важи само кога ќе биде внесен на оваа официјална страница. Измамниците не можат да го репродуцираат криптографскиот отпечаток.',
+  'faq.home.q3': 'Зошто не испраќате линкови во SMS?',
+  'faq.home.a3':
+    'Линковите можат да бидат лажирани од измамници. Со испраќање само на код и со тоа што вие самите ја внесувате адресата, ризикот од фишинг е целосно елиминиран.',
+  'faq.home.q4': 'Дали можам да верувам во овој систем?',
+  'faq.home.a4':
+    'Системот е изграден на Solana блокчејн, кој е јавен и непроменлив. Секое плаќање е видливо за сите и верификувано од мрежата.',
+  'faq.home.q5': 'Како да го проверам мојот прекршок?',
+  'faq.home.a5':
+    'Внесете го безбедносниот код од SMS пораката во полето за проверка. Системот ќе ги прикаже деталите, доказите и опциите за плаќање.',
+
+  // FAQ - Violation view
+  'faq.violation.title': 'За вашиот прекршок',
+  'faq.violation.daysLeftQ': 'Колку денови имам за да платам со попуст?',
+  'faq.violation.daysLeftA': 'Имате {days} дена преостанати од денес да го искористите попустот за навремено плаќање.',
+  'faq.violation.disagreeQ': 'Што ако верувам дека казната е погрешна?',
+  'faq.violation.disagreeA':
+    'Можете да поднесете приговор или да ја контактирате сообраќајната власт. Прегледајте ги доказите и образложете го вашиот приговор.',
+  'faq.violation.appealQ': 'Дали можам да поднесам приговор?',
+  'faq.violation.appealA':
+    'Да. Користете го делот "Поднеси приговор" на оваа страница за да генерирате формален приговор. Потоа однесете го во полициска станица.',
+  'faq.violation.paymentQ': 'Како да го платам прекршокот?',
+  'faq.violation.paymentA':
+    'Користете го панелот за плаќање десно. Поврзете Solana паричник на Devnet и кликнете "Плати". Плаќањето е веднаш потврдено.',
+  'faq.violation.evidenceQ': 'Какви докази се достапни?',
+  'faq.violation.evidenceA':
+    'Системот прикажува фото-докази од сообраќајната камера, вклучувајќи слика од прекршокот, препознавање на регистарски таблици и мапа на локацијата.',
+
   // Footer
   'footer.about.title': 'За Safe City MK',
   'footer.about.body':
@@ -488,6 +523,41 @@ const en: Record<string, string> = {
   'appeal.new': 'New appeal',
   'appeal.error': 'Error while generating the document. Try again or refresh the page.',
 
+  // FAQ - Home page
+  'faq.home.title': 'Frequently asked questions',
+  'faq.home.q1': 'What is Safe City?',
+  'faq.home.a1':
+    'Safe City is a transparent traffic violation system that lets you securely check your fines and pay them on the blockchain. All evidence and payments are recorded on-chain.',
+  'faq.home.q2': 'Is my security code really secure?',
+  'faq.home.a2':
+    'Yes. Your code is sent via SMS with no links. It is only valid when entered on this official website. Scammers cannot replicate the cryptographic fingerprint.',
+  'faq.home.q3': "Why don't you send links in SMS?",
+  'faq.home.a3':
+    'Links can be faked by scammers. By sending only a code and having you type the address yourself, phishing risks are completely eliminated.',
+  'faq.home.q4': 'Can I trust this system?',
+  'faq.home.a4':
+    'The system is built on the Solana blockchain, which is public and immutable. Every payment is visible to everyone and verified by the network.',
+  'faq.home.q5': 'How do I check my violation?',
+  'faq.home.a5':
+    'Enter the security code from your SMS in the check field. The system will show the details, evidence, and payment options.',
+
+  // FAQ - Violation view
+  'faq.violation.title': 'About your violation',
+  'faq.violation.daysLeftQ': 'How many days do I have to pay with a discount?',
+  'faq.violation.daysLeftA': 'You have {days} days remaining from today to use the early-payment discount.',
+  'faq.violation.disagreeQ': 'What if I believe the fine is wrong?',
+  'faq.violation.disagreeA':
+    'You can file an appeal or contact the traffic authority. Review the evidence and provide your grounds clearly.',
+  'faq.violation.appealQ': 'Can I appeal this violation?',
+  'faq.violation.appealA':
+    'Yes. Use the "Submit Appeal" section on this page to generate a formal appeal. Then submit it to a police station.',
+  'faq.violation.paymentQ': 'How do I pay the fine?',
+  'faq.violation.paymentA':
+    'Use the payment panel on the right. Connect a Solana wallet on Devnet and click "Pay". The payment is confirmed immediately.',
+  'faq.violation.evidenceQ': 'What evidence is available?',
+  'faq.violation.evidenceA':
+    'The system shows photo evidence from the traffic camera, including the violation capture, plate recognition, and location map.',
+
   // Footer
   'footer.about.title': 'About Safe City MK',
   'footer.about.body':
@@ -689,6 +759,39 @@ const srLatin: Record<string, string> = {
   'pay.receipt.note':
     'Potvrda se čuva lokalno i u backend-u. Blockchain uplate mogu javno da se provere na Solana Exploreru.',
   'pay.alreadyPaid': 'Ova kazna je već plaćena.',
+
+  'faq.home.title': 'Često postavljana pitanja',
+  'faq.home.q1': 'Šta je Safe City?',
+  'faq.home.a1':
+    'Safe City je transparentan sistem za saobraćajne prekršaje koji vam omogućava da bezbedno proverite kazne i platite ih na blockchainu. Svi dokazi su zabeleženi na lancu.',
+  'faq.home.q2': 'Da li je moj bezbednosni kod zaista bezbedan?',
+  'faq.home.a2':
+    'Da. Vaš kod se šalje SMS-om bez linkova. Važi samo kada se unese na ovoj zvaničnoj stranici. Prevaranti ne mogu da reprodukuju kriptografski otisak.',
+  'faq.home.q3': 'Zašto ne šaljete linkove u SMS-u?',
+  'faq.home.a3':
+    'Linkovi mogu biti lažirani. Slanjem samo koda i upućivanjem da sami ukucate adresu, rizik od phishinga je potpuno eliminisan.',
+  'faq.home.q4': 'Mogu li da verujem ovom sistemu?',
+  'faq.home.a4':
+    'Sistem je izgrađen na Solana blockchainu, koji je javan i nepromenljiv. Svako plaćanje je vidljivo svima.',
+  'faq.home.q5': 'Kako da proverim svoj prekršaj?',
+  'faq.home.a5':
+    'Unesite bezbednosni kod iz SMS poruke u polje za proveru. Sistem će prikazati detalje, dokaze i opcije plaćanja.',
+
+  'faq.violation.title': 'O vašem prekršaju',
+  'faq.violation.daysLeftQ': 'Koliko dana imam da platim sa popustom?',
+  'faq.violation.daysLeftA': 'Imate {days} dana preostalo od danas da iskoristite popust za blagovremeno plaćanje.',
+  'faq.violation.disagreeQ': 'Šta ako verujem da je kazna pogrešna?',
+  'faq.violation.disagreeA':
+    'Možete podneti prigovor ili kontaktirati saobraćajnu vlast. Pregledajte dokaze i obrazložite svoj prigovor.',
+  'faq.violation.appealQ': 'Mogu li da podnesem prigovor?',
+  'faq.violation.appealA':
+    'Da. Koristite deo "Podnesi prigovor" na ovoj stranici da generišete formalni prigovor. Zatim ga odnesite u policijsku stanicu.',
+  'faq.violation.paymentQ': 'Kako da platim prekršaj?',
+  'faq.violation.paymentA':
+    'Koristite panel za plaćanje desno. Povežite Solana novčanik na Devnet-u i kliknite "Plati". Plaćanje je odmah potvrđeno.',
+  'faq.violation.evidenceQ': 'Koji dokazi su dostupni?',
+  'faq.violation.evidenceA':
+    'Sistem prikazuje foto-dokaze sa saobraćajne kamere, uključujući snimak prekršaja, prepoznavanje tablice i mapu lokacije.',
 
   'footer.about.title': 'O Safe City MK',
   'footer.about.body':
@@ -924,6 +1027,39 @@ const sr: Record<string, string> = {
   'appeal.download': 'Преузми PDF',
   'appeal.new': 'Нови приговор',
   'appeal.error': 'Грешка при генерисању документа. Покушајте поново или освежите страницу.',
+
+  'faq.home.title': 'Често постављана питања',
+  'faq.home.q1': 'Шта је Safe City?',
+  'faq.home.a1':
+    'Safe City је транспарентан систем за саобраћајне прекршаје који вам омогућава да безбедно проверите казне и платите их на блокчејну. Сви докази су забележени на ланцу.',
+  'faq.home.q2': 'Да ли је мој безбедносни код заиста безбедан?',
+  'faq.home.a2':
+    'Да. Ваш код се шаље SMS-ом без линкова. Важи само када се унесе на овој званичној страници. Преваранти не могу да репродукују криптографски отисак.',
+  'faq.home.q3': 'Зашто не шаљете линкове у SMS-у?',
+  'faq.home.a3':
+    'Линкови могу бити лажирани. Слањем само кода и упућивањем да сами укуцате адресу, ризик од фишинга је потпуно елиминисан.',
+  'faq.home.q4': 'Могу ли да верујем овом систему?',
+  'faq.home.a4':
+    'Систем је изграђен на Solana блокчејну, који је јаван и непроменљив. Свако плаћање је видљиво свима.',
+  'faq.home.q5': 'Како да проверим свој прекршај?',
+  'faq.home.a5':
+    'Унесите безбедносни код из SMS поруке у поље за проверу. Систем ће приказати детаље, доказе и опције плаћања.',
+
+  'faq.violation.title': 'О вашем прекршају',
+  'faq.violation.daysLeftQ': 'Колико дана имам да платим са попустом?',
+  'faq.violation.daysLeftA': 'Имате {days} дана преостало од данас да искористите попуст за благовремено плаћање.',
+  'faq.violation.disagreeQ': 'Шта ако верујем да је казна погрешна?',
+  'faq.violation.disagreeA':
+    'Можете поднети приговор или контактирати саобраћајну власт. Прегледајте доказе и образложите свој приговор.',
+  'faq.violation.appealQ': 'Могу ли да поднесем приговор?',
+  'faq.violation.appealA':
+    'Да. Користите део "Поднеси приговор" на овој страници да генеришете формални приговор. Затим га однесите у полицијску станицу.',
+  'faq.violation.paymentQ': 'Како да платим прекршај?',
+  'faq.violation.paymentA':
+    'Користите панел за плаћање десно. Повежите Solana новчаник на Devnet-у и кликните "Плати". Плаћање је одмах потврђено.',
+  'faq.violation.evidenceQ': 'Који докази су доступни?',
+  'faq.violation.evidenceA':
+    'Систем приказује фото-доказе са саобраћајне камере, укључујући снимак прекршаја, препознавање таблице и мапу локације.',
 
   'footer.about.title': 'О Safe City MK',
   'footer.about.body':
