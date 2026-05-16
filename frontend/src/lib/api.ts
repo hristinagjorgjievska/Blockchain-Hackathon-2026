@@ -87,11 +87,27 @@ export async function getRemotePayment(code: string): Promise<PaymentRecord | nu
 }
 
 export async function createNonCryptoPayment(code: string): Promise<PaymentRecord> {
-  const body = await request<{ payment: PaymentRecord }>('/api/payments/non-crypto', {
-    method: 'POST',
-    body: JSON.stringify({ code, method: 'card' }),
-  });
-  return body.payment;
+  try {
+    const body = await request<{ payment: PaymentRecord }>('/api/payments/non-crypto', {
+      method: 'POST',
+      body: JSON.stringify({ code, method: 'card' }),
+    });
+    return body.payment;
+  } catch {
+    // Backend unavailable (Vercel static deploy) — generate a local receipt.
+    const violation = findViolation(code);
+    const amountMKD = violation
+      ? Math.round(violation.baseFineMKD * 0.5)
+      : 0;
+    return {
+      method: 'non_crypto',
+      receiptId: `RCP-${Date.now().toString(36).toUpperCase()}`,
+      paidAtIso: new Date().toISOString(),
+      amountMKD,
+      network: 'card',
+      provider: 'demo',
+    };
+  }
 }
 
 export async function createEncryptedMemo(input: {
@@ -123,12 +139,36 @@ export async function createEncryptedMemo(input: {
   }
 }
 
+// Parses the plaintext fallback memo written by createEncryptedMemo when the
+// backend is unreachable (e.g. Vercel static deploy).
+// Format: SafeChain|<code>|<refId>|<amountMKD>MKD|<amountSol>SOL
+function parsePlaintextMemo(memo: string): DecryptedMemoPayload {
+  const parts = memo.split('|');
+  if (parts[0] !== 'SafeChain' || parts.length < 5) throw new Error('Unknown memo format');
+  return {
+    v: 1,
+    refId: parts[2],
+    codeHash: '',
+    amountMKD: parseFloat(parts[3].replace('MKD', '')),
+    amountSol: parseFloat(parts[4].replace('SOL', '')),
+    payer: '',
+    fingerprint: null,
+    paidAt: '',
+  };
+}
+
 export async function decryptMemo(memo: string): Promise<DecryptedMemoPayload> {
-  const body = await request<{ payload: DecryptedMemoPayload }>('/api/memos/decrypt', {
-    method: 'POST',
-    body: JSON.stringify({ memo }),
-  });
-  return body.payload;
+  try {
+    const body = await request<{ payload: DecryptedMemoPayload }>('/api/memos/decrypt', {
+      method: 'POST',
+      body: JSON.stringify({ memo }),
+    });
+    return body.payload;
+  } catch {
+    // Backend unavailable (Vercel static deploy) — fall back to local parsing.
+    if (memo.startsWith('SafeChain|')) return parsePlaintextMemo(memo);
+    throw new Error('Memo could not be decrypted');
+  }
 }
 
 export async function recordCryptoPayment(input: {

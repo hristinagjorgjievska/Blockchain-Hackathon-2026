@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ConnectButton } from 'thirdweb/react';
+import { ConnectButton, useActiveAccount } from 'thirdweb/react';
 import { inAppWallet, createWallet } from 'thirdweb/wallets';
 import { thirdwebClient } from '../thirdweb/client';
 import { useLang } from '../i18n/LangContext';
@@ -97,11 +97,37 @@ const CONNECT_BTN_STYLE: React.CSSProperties = {
 };
 
 function SolanaConnectButton({ label }: { label: string }) {
+  const account = useActiveAccount();
+
   return (
     <ConnectButton
       client={thirdwebClient}
       wallets={WALLETS}
       connectButton={{ label, style: CONNECT_BTN_STYLE }}
+      detailsButton={
+        account
+          ? {
+              render: () => (
+                <button
+                  type="button"
+                  className="flex items-center gap-2 rounded-xl bg-[#1a2035] px-3 py-2 text-sm font-semibold text-white transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300"
+                >
+                  <span
+                    aria-hidden
+                    className="h-2 w-2 rounded-full"
+                    style={{ background: 'linear-gradient(135deg,#9945ff,#14f195)' }}
+                  />
+                  <span className="font-mono text-xs">
+                    {account.address.slice(0, 6)}…{account.address.slice(-4)}
+                  </span>
+                  <span className="rounded bg-white/15 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide">
+                    SOL
+                  </span>
+                </button>
+              ),
+            }
+          : undefined
+      }
       connectModal={{
         size: 'compact',
         title: 'SafeChain MK',

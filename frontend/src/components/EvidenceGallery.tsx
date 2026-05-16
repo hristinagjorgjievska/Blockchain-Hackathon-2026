@@ -24,6 +24,7 @@ const ITEMS: { key: EvidenceKey; labelKey: string }[] = [
 export function EvidenceGallery({ violation }: { violation: Violation }) {
   const { t, lang } = useLang();
   const [active, setActive] = useState<number | null>(null);
+  const [hidden, setHidden] = useState<Set<EvidenceKey>>(new Set());
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const lastFocused = useRef<HTMLElement | null>(null);
@@ -99,13 +100,13 @@ export function EvidenceGallery({ violation }: { violation: Violation }) {
       </div>
 
       <div className="grid gap-3 p-5 sm:grid-cols-2 sm:p-6">
-        {ITEMS.map((item, i) => (
+        {ITEMS.filter((item) => !hidden.has(item.key)).map((item, _, arr) => (
           <button
             key={item.key}
             type="button"
-            onClick={() => openAt(i)}
+            onClick={() => openAt(ITEMS.findIndex((it) => it.key === item.key))}
             className={`group block overflow-hidden rounded-xl border border-slate-200 bg-white text-left shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-lift focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 ${
-              item.key === 'scene' ? 'sm:col-span-2' : ''
+              item.key === 'scene' || arr.length === 1 ? 'sm:col-span-2' : ''
             }`}
           >
             <div className="relative bg-navy-950">
@@ -114,6 +115,17 @@ export function EvidenceGallery({ violation }: { violation: Violation }) {
                 <IconSearch className="h-3.5 w-3.5" />
                 {t('evidence.zoom')}
               </span>
+              <button
+                type="button"
+                aria-label="Close"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setHidden((prev) => new Set([...prev, item.key]));
+                }}
+                className="absolute left-2.5 top-2.5 grid h-7 w-7 place-items-center rounded-full bg-black/60 text-white/80 ring-1 ring-white/20 transition-colors hover:bg-black/80 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300"
+              >
+                <IconClose className="h-4 w-4" />
+              </button>
             </div>
             <div className="flex items-center justify-between gap-2 px-3.5 py-2.5">
               <div className="min-w-0">
