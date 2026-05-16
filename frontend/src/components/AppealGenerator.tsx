@@ -2,7 +2,7 @@
  // * Dependency: npm install pdf-lib
  
 
-import { useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLang } from '../i18n/LangContext';
 import { amountDueNowMKD, type Violation } from '../data/violations';
 import { setLocalStatus } from '../lib/violationStatusStore';
@@ -163,7 +163,7 @@ function dataUrlToBytes(dataUrl: string): Uint8Array {
   return bytes;
 }
 
-async function buildPdf(appealText: string, v: Violation, images: string[] = []): Promise<Blob> {
+async function buildPdf(appealText: string, v: Violation, images: string[] = [], signatureDataUrl?: string | null): Promise<Blob> {
   const { PDFDocument, rgb } = await import('pdf-lib');
   const fontkit = await import('@pdf-lib/fontkit');
 
@@ -525,8 +525,16 @@ async function buildPdf(appealText: string, v: Violation, images: string[] = [])
 
   const paragraphs = appealText.split('\n').map(p => p.trim()).filter(Boolean);
 
+  let signatureImage: EmbeddedImage | null = null;
+  if (signatureDataUrl) {
+    try {
+      const sigBytes = dataUrlToBytes(signatureDataUrl);
+      signatureImage = await doc.embedPng(sigBytes);
+    } catch { signatureImage = null; }
+  }
+
   const drawSignatureBlock = (dateLine: string) => {
-    ensureSpace(84);
+    ensureSpace(signatureImage ? 120 : 84);
 
     page.drawText('Со почит,', {
       x: ML,
@@ -535,6 +543,24 @@ async function buildPdf(appealText: string, v: Violation, images: string[] = [])
       color: INK,
       font,
     });
+
+    // Draw signature image above the left line if available
+    if (signatureImage) {
+      const sigDims = signatureImage.size();
+      const maxSigW = 140;
+      const maxSigH = 50;
+      let sigW = sigDims.width;
+      let sigH = sigDims.height;
+      if (sigW > maxSigW) { sigH = (sigH * maxSigW) / sigW; sigW = maxSigW; }
+      if (sigH > maxSigH) { sigW = (sigW * maxSigH) / sigH; sigH = maxSigH; }
+      page.drawImage(signatureImage, {
+        x: ML + 8,
+        y: y - 22 - sigH,
+        width: sigW,
+        height: sigH,
+      });
+      y -= sigH + 4;
+    }
 
     const lineY = y - 26;
     page.drawLine({
@@ -736,7 +762,7 @@ export function AppealGenerator({
   violation: Violation;
   onAppealSubmitted?: () => void;
 }) {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const [open,        setOpen]        = useState(false);
   const [step,        setStep]        = useState<Step>('form');
   const [ground,      setGround]      = useState('');
@@ -748,6 +774,9 @@ export function AppealGenerator({
   const [images,      setImages]      = useState<string[]>([]);
   const blobRef = useRef<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const sigCanvasRef = useRef<HTMLCanvasElement>(null);
+  const [sigDrawing, setSigDrawing] = useState(false);
+  const [hasSig, setHasSig] = useState(false);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.currentTarget.files;
@@ -772,6 +801,22 @@ export function AppealGenerator({
     setImages(prev => prev.filter((_, i) => i !== idx));
   };
 
+  const getSignatureDataUrl = useCallback((): string | null => {
+    const canvas = sigCanvasRef.current;
+    if (!canvas || !hasSig) return null;
+    return canvas.toDataURL('image/png');
+  }, [hasSig]);
+
+  const regeneratePdf = useCallback(async (text: string, sigData?: string | null) => {
+    try {
+      const blob = await buildPdf(text, violation, images, sigData);
+      if (blobRef.current) URL.revokeObjectURL(blobRef.current);
+      const url = URL.createObjectURL(blob);
+      blobRef.current = url;
+      setPdfUrl(url);
+    } catch { /* ignore regen failure */ }
+  }, [violation, images]);
+
   const generate = async () => {
     if (!ground || description.trim().length < 10) return;
     setLoading(true);
@@ -786,6 +831,7 @@ export function AppealGenerator({
 
       setAppealText(text);
       setPdfUrl(url);
+      setHasSig(false);
       setStep('result');
     } catch (err) {
       console.error('PDF generation failed:', err);
@@ -812,7 +858,78 @@ export function AppealGenerator({
     setPdfUrl(null);
     setShowText(false);
     setImages([]);
+    setHasSig(false);
   };
+
+  // --- Signature pad drawing handlers ---
+  const sigStartDraw = useCallback((e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+    const canvas = sigCanvasRef.current;
+    if (!canvas) return;
+    setSigDrawing(true);
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    let x: number, y: number;
+    if ('touches' in e) {
+      x = (e.touches[0].clientX - rect.left) * scaleX;
+      y = (e.touches[0].clientY - rect.top) * scaleY;
+    } else {
+      x = (e.clientX - rect.left) * scaleX;
+      y = (e.clientY - rect.top) * scaleY;
+    }
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+  }, []);
+
+  const sigDraw = useCallback((e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+    if (!sigDrawing) return;
+    const canvas = sigCanvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    let x: number, y: number;
+    if ('touches' in e) {
+      e.preventDefault();
+      x = (e.touches[0].clientX - rect.left) * scaleX;
+      y = (e.touches[0].clientY - rect.top) * scaleY;
+    } else {
+      x = (e.clientX - rect.left) * scaleX;
+      y = (e.clientY - rect.top) * scaleY;
+    }
+    ctx.strokeStyle = '#0f172a';
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.lineTo(x, y);
+    ctx.stroke();
+  }, [sigDrawing]);
+
+  const sigEndDraw = useCallback(() => {
+    if (sigDrawing) {
+      setSigDrawing(false);
+      setHasSig(true);
+    }
+  }, [sigDrawing]);
+
+  const sigClear = useCallback(() => {
+    const canvas = sigCanvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
+    setHasSig(false);
+  }, []);
+
+  // When signature changes, regenerate PDF
+  useEffect(() => {
+    if (step !== 'result' || !appealText) return;
+    const sigData = getSignatureDataUrl();
+    regeneratePdf(appealText, sigData);
+  }, [hasSig]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const canSubmit = ground !== '' && description.trim().length >= 10;
 
@@ -955,6 +1072,63 @@ export function AppealGenerator({
                 <p className="text-sm font-semibold text-slate-800">
                   {t('appeal.ready')}
                 </p>
+              </div>
+
+              {/* Signature pad */}
+              <div className="rounded-xl border border-slate-200 overflow-hidden">
+                <div className="flex items-center gap-2 bg-slate-50 border-b border-slate-200 px-4 py-2.5">
+                  <IcDoc cls="h-4 w-4 text-slate-400" />
+                  <span className="text-sm font-medium text-slate-700">
+                    {lang === 'mk' ? 'Дигитален потпис' : lang === 'sr' ? 'Дигитални потпис' : 'Digital signature'}
+                  </span>
+                  {hasSig && (
+                    <button
+                      type="button"
+                      onClick={sigClear}
+                      className="ml-auto text-xs font-medium text-red-600 hover:text-red-700 transition"
+                    >
+                      {lang === 'mk' ? 'Избриши' : lang === 'sr' ? 'Обриши' : 'Clear'}
+                    </button>
+                  )}
+                </div>
+                <div className="p-4 bg-white">
+                  <p className="text-xs text-slate-500 mb-2">
+                    {lang === 'mk'
+                      ? 'Нацртајте го вашиот потпис подолу. Потписот ќе биде вметнат во PDF документот.'
+                      : lang === 'sr'
+                        ? 'Нацртајте свој потпис испод. Потпис ће бити уметнут у PDF документ.'
+                        : 'Draw your signature below. It will be embedded in the PDF document.'}
+                  </p>
+                  <div className="relative">
+                    <canvas
+                      ref={sigCanvasRef}
+                      width={400}
+                      height={120}
+                      className="w-full rounded-lg border border-dashed border-slate-300 bg-slate-50/50 cursor-crosshair touch-none"
+                      style={{ height: 120 }}
+                      onMouseDown={sigStartDraw}
+                      onMouseMove={sigDraw}
+                      onMouseUp={sigEndDraw}
+                      onMouseLeave={sigEndDraw}
+                      onTouchStart={sigStartDraw}
+                      onTouchMove={sigDraw}
+                      onTouchEnd={sigEndDraw}
+                    />
+                    {!hasSig && (
+                      <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                        <span className="text-sm text-slate-300 italic">
+                          {lang === 'mk' ? 'Потпишете се овде' : lang === 'sr' ? 'Потпишите се овде' : 'Sign here'}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  {hasSig && (
+                    <p className="mt-1.5 flex items-center gap-1 text-xs text-emerald-600">
+                      <IcCheck cls="h-3 w-3" />
+                      {lang === 'mk' ? 'Потписот е додаден во PDF' : lang === 'sr' ? 'Потпис је додат у PDF' : 'Signature added to PDF'}
+                    </p>
+                  )}
+                </div>
               </div>
 
               <div className="rounded-xl border border-slate-200 overflow-hidden">

@@ -1,10 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useLang } from '../i18n/LangContext';
-import { VIOLATIONS } from '../data/violations';
 import {
   IconAlert,
-  IconArrowRight,
-  IconChevronDown,
   IconKey,
   IconSearch,
   IconSpinner,
@@ -155,35 +152,7 @@ export function CodeInput({ onSubmit, loading, error }: Props) {
           </p>
         )}
 
-        <details className="group mt-4 rounded-xl border border-slate-200 bg-slate-50/80">
-          <summary className="flex cursor-pointer select-none items-center justify-between gap-2 rounded-xl px-3.5 py-2.5 text-sm font-medium text-slate-600 transition-colors hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-200">
-            <span className="flex items-center gap-2">
-              <IconKey className="h-4 w-4 text-slate-400" />
-              {t('code.demo.title')}
-            </span>
-            <IconChevronDown className="h-4 w-4 text-slate-400 transition-transform duration-200 group-open:rotate-180" />
-          </summary>
-          <div className="px-3.5 pb-3.5">
-            <p className="text-xs text-slate-500">{t('code.demo.hint')}</p>
-            <div className="mt-2.5 flex flex-wrap gap-2">
-              {VIOLATIONS.map((v) => (
-                <button
-                  key={v.code}
-                  type="button"
-                  onClick={() => {
-                    stopAnimation();
-                    setValue(v.code);
-                    if (!loading) onSubmit(v.code);
-                  }}
-                  className="group/code flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 font-mono text-xs font-medium text-slate-700 transition-colors duration-150 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-200"
-                >
-                  {v.code}
-                  <IconArrowRight className="h-3.5 w-3.5 opacity-0 transition-opacity group-hover/code:opacity-100" />
-                </button>
-              ))}
-            </div>
-          </div>
-        </details>
+
       </div>
     </form>
   );

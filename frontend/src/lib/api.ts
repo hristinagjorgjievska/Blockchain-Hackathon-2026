@@ -101,17 +101,26 @@ export async function createEncryptedMemo(input: {
   amountSol: number;
   payer: string;
 }): Promise<{ memo: string; summary: string[] }> {
-  return request<{ memo: string; summary: string[] }>('/api/memos/encrypt', {
-    method: 'POST',
-    body: JSON.stringify({
-      code: input.violation.code,
-      refId: input.violation.refId,
-      fingerprint: input.fingerprint,
-      amountMKD: input.amountMKD,
-      amountSol: input.amountSol,
-      payer: input.payer,
-    }),
-  });
+  try {
+    return await request<{ memo: string; summary: string[] }>('/api/memos/encrypt', {
+      method: 'POST',
+      body: JSON.stringify({
+        code: input.violation.code,
+        refId: input.violation.refId,
+        fingerprint: input.fingerprint,
+        amountMKD: input.amountMKD,
+        amountSol: input.amountSol,
+        payer: input.payer,
+      }),
+    });
+  } catch {
+    // Fallback: plaintext memo when backend is unavailable (e.g. Vercel static deploy)
+    const memo = `SafeChain|${input.violation.code}|${input.violation.refId}|${input.amountMKD}MKD|${input.amountSol}SOL`;
+    return {
+      memo,
+      summary: ['code', 'refId', 'amountMKD', 'amountSol'],
+    };
+  }
 }
 
 export async function decryptMemo(memo: string): Promise<DecryptedMemoPayload> {

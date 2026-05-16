@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useActiveAccount } from 'thirdweb/react';
 import { useLang } from '../i18n/LangContext';
 import { VIOLATIONS, amountDueNowMKD, type Violation, type ViolationKind } from '../data/violations';
@@ -199,11 +199,8 @@ export function NftCarousel({ onOpen }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [violations, setViolations] = useState<Violation[]>(VIOLATIONS);
   const address = account?.address ?? '';
-  const ownerName = 'SafeChain Group';
-  const licensePlates = useMemo(
-    () => Array.from(new Set(violations.map((v) => v.plate))).join(', '),
-    [violations],
-  );
+  const ownerName = 'Андреј Сојаноски';
+  const licensePlate = 'SK 501 TB';
 
   useEffect(() => {
     if (!address) return;
@@ -251,7 +248,7 @@ export function NftCarousel({ onOpen }: Props) {
               </span>
               {' · '}
               <span className="font-semibold text-white/55">
-                {t('carousel.licensePlates')} {licensePlates}
+                {t('carousel.licensePlates')} {licensePlate}
               </span>
             </p>
           </div>

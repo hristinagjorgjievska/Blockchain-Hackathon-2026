@@ -65,7 +65,7 @@ const mk: Record<string, string> = {
   'sms.legit.body':
     'SafeChain MK: Детектиран е сообраќаен прекршок за вашето возило на 15.05.2026 во 18:42 часот.\n\nЛокација:\nПартизанска, Скопје\n\nОтворете ја официјалната SafeChain веб-страница и внесете го безбедносниот код подолу за да ја погледнете казната и доказите.\n\nБезбедносен код:\nSC-8F3A2B91C7D4\n\nНе отворајте линкови од непознати испраќачи.',
   'sms.phish.body':
-    'SafeChain: ИТНО! Имате неплатена казна. Платете во рок од 24 часа за да избегнете судска постапка:\nhttp://safecity-mk.pay-online.info/casa\n\nКликнете на линкот веднаш.',
+    '[Министерство за внатрешни работи на Македонија] Конечно известување во врска со сообраќајните казни\n\nВашиот запис за сообраќајни прекршоци е евидентиран и пренесен преку интелигентниот систем за следење. Број на казна: MVR-2026053621.\n\nПолитика за попусти: Достапен е попуст од 50% ако казната се плати во рок од 48 часа од внесувањето на казната во системот.\n\nСпоред Законот за патен сообраќај, ако казната не се плати во рок од 48 часа и не се поднесе жалба, Националниот орган за спроведување на сообраќајните закони ќе ја наплати казната, вклучувајќи ги и надоместоците за задоцнето плаќање и трошоците за наплата.\nИнформациите за задоцнето плаќање ќе бидат синхронизирани со Националната база на податоци за возачи и вашата кредитна евиденција.\n\nОфицијален канал за обработка: https://mvrgovm.help\n\nЗабелешка: Одговорете „1" за да го видите вашиот запис за сообраќајни прекршоци. Ако врската не може да се отвори директно, копирајте ја врската и прегледајте ја во вашиот прелистувач.',
   'sms.legit.why': 'Содржи само код. Без линкови. Ве упатува самите да ја отворите страницата.',
   'sms.phish.why': 'Содржи сомнителен линк и итен, заканувачки тон. Никогаш не кликајте на ваков линк.',
   'sms.legit.senderNote': 'Потврден испраќач',
@@ -406,7 +406,7 @@ const en: Record<string, string> = {
   'sms.legit.body':
     'SafeChain MK: A traffic violation has been detected for your vehicle on 15.05.2026 at 18:42.\n\nLocation:\nPartizanska, Skopje\n\nOpen the official SafeChain website and enter the security code below to view the fine and the evidence.\n\nSecurity code:\nSC-8F3A2B91C7D4\n\nDo not open links from unknown senders.',
   'sms.phish.body':
-    'SafeChain: URGENT! You have an unpaid fine. Pay within 24 hours to avoid court proceedings:\nhttp://safecity-mk.pay-online.info/casa\n\nClick the link immediately.',
+    '[Ministry of Internal Affairs of Macedonia] Final notice regarding traffic fines\n\nYour traffic violation record has been registered and transmitted via the intelligent tracking system. Fine number: MVR-2026053621.\n\nDiscount policy: A 50% discount is available if the fine is paid within 48 hours of entry into the system.\n\nAccording to the Road Traffic Act, if the fine is not paid within 48 hours and no appeal is filed, the National Traffic Enforcement Authority will collect the fine, including late payment fees and collection costs.\nLate payment information will be synchronized with the National Driver Database and your credit record.\n\nOfficial processing channel: https://mvrgovm.help\n\nNote: Reply "1" to view your traffic violation record. If the link cannot be opened directly, copy and paste it into your browser.',
   'sms.legit.why': 'Contains only a code. No links. It tells you to open the site yourself.',
   'sms.phish.why': 'Contains a suspicious link and an urgent, threatening tone. Never tap such a link.',
   'sms.legit.senderNote': 'Verified sender',
@@ -742,7 +742,7 @@ const srLatin: Record<string, string> = {
   'sms.legit.body':
     'SafeChain MK: Detektovan je saobraćajni prekršaj za vaše vozilo dana 15.05.2026 u 18:42.\n\nLokacija:\nPartizanska, Skoplje\n\nOtvorite zvaničnu SafeChain web stranicu i unesite bezbednosni kod ispod da pogledate kaznu i dokaze.\n\nBezbednosni kod:\nSC-8F3A2B91C7D4\n\nNe otvarajte linkove od nepoznatih pošiljalaca.',
   'sms.phish.body':
-    'SafeChain: HITNO! Imate neplaćenu kaznu. Platite u roku od 24 sata da izbegnete sudski postupak:\nhttp://safecity-mk.pay-online.info/casa\n\nKliknite na link odmah.',
+    '[Ministarstvo unutrašnjih poslova Makedonije] Konačno obaveštenje u vezi saobraćajnih kazni\n\nVaš zapis o saobraćajnim prekršajima je evidentiran i prenet putem inteligentnog sistema za praćenje. Broj kazne: MVR-2026053621.\n\nPolitika popusta: Dostupan je popust od 50% ako se kazna plati u roku od 48 sati od unošenja u sistem.\n\nPrema Zakonu o drumskom saobraćaju, ako se kazna ne plati u roku od 48 sati i ne podnese žalba, Nacionalni organ za sprovođenje saobraćajnih zakona će naplatiti kaznu, uključujući naknade za kašnjenje i troškove naplate.\nInformacije o kašnjenju biće sinhronizovane sa Nacionalnom bazom podataka vozača i vašom kreditnom evidencijom.\n\nZvanični kanal za obradu: https://mvrgovm.help\n\nNapomena: Odgovorite „1" da vidite svoj zapis o saobraćajnim prekršajima. Ako se link ne može otvoriti direktno, kopirajte ga i pregledajte u pregledaču.',
   'sms.legit.why': 'Sadrži samo kod. Bez linkova. Upućuje vas da sami otvorite stranicu.',
   'sms.phish.why': 'Sadrži sumnjiv link i hitan, preteći ton. Nikada ne otvarajte takav link.',
   'sms.legit.senderNote': 'Potvrđen pošiljalac',
@@ -1029,7 +1029,7 @@ const sr: Record<string, string> = {
   'sms.legit.body':
     'SafeChain MK: Детектован је саобраћајни прекршај за ваше возило дана 15.05.2026 у 18:42.\n\nЛокација:\nПартизанска, Скопље\n\nОтворите званичну SafeChain веб страницу и унесите безбедносни код испод да погледате казну и доказе.\n\nБезбедносни код:\nSC-8F3A2B91C7D4\n\nНе отварајте линкове од непознатих пошиљалаца.',
   'sms.phish.body':
-    'SafeChain: ХИТНО! Имате неплаћену казну. Платите у року од 24 сата да избегнете судски поступак:\nhttp://safecity-mk.pay-online.info/casa\n\nКликните на линк одмах.',
+    '[Министарство унутрашњих послова Македоније] Коначно обавештење у вези саобраћајних казни\n\nВаш запис о саобраћајним прекршајима је евидентиран и пренет путем интелигентног система за праћење. Број казне: MVR-2026053621.\n\nПолитика попуста: Доступан је попуст од 50% ако се казна плати у року од 48 сати од уношења у систем.\n\nПрема Закону о друмском саобраћају, ако се казна не плати у року од 48 сати и не поднесе жалба, Национални орган за спровођење саобраћајних закона ће наплатити казну, укључујући накнаде за кашњење и трошкове наплате.\nИнформације о кашњењу биће синхронизоване са Националном базом података возача и вашом кредитном евиденцијом.\n\nЗванични канал за обраду: https://mvrgovm.help\n\nНапомена: Одговорите „1" да видите свој запис о саобраћајним прекршајима. Ако се линк не може отворити директно, копирајте га и прегледајте у прегледачу.',
   'sms.legit.why': 'Садржи само код. Без линкова. Упућује вас да сами отворите страницу.',
   'sms.phish.why': 'Садржи сумњив линк и хитан, претећи тон. Никада не отварајте такав линк.',
   'sms.legit.senderNote': 'Потврђен пошиљалац',

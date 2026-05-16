@@ -11,7 +11,7 @@ import {
 
 /** The code and link are language-independent demo tokens embedded in the SMS copy. */
 const LEGIT_CODE = VIOLATIONS[0].code;
-const PHISH_LINK = 'http://safecity-mk.pay-online.info/casa';
+const PHISH_LINK = 'https://mvrgovm.help';
 
 function StatusBar() {
   return (
