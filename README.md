@@ -4,8 +4,8 @@
 
 ## Links
 
-- [📺 Watch the Project Video](#)
-- [📊 View the Presentation](https://safe-chain-presentation.vercel.app/)
+- [📺 Project Video](#)
+- [📊 Presentation](https://safe-chain-presentation.vercel.app/)
 
 ## Overview
 
