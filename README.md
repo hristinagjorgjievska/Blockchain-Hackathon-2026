@@ -1,6 +1,6 @@
 # 🔗 SafeChain MK — Anti-Phishing Traffic Fine Portal
 
-🏆 **Winner** of the 1st Blockchain Hackathon — Skopje 2026.
+## 🏆 1st Place Winner — Blockchain Hackathon Skopje 2026
 
 ## Links
 
