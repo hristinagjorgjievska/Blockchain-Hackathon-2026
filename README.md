@@ -43,35 +43,26 @@ fake. The app teaches this model and reinforces it throughout the UI.
 
 Paying with crypto is a **real Solana transaction** (devnet):
 
-- A SOL transfer from the citizen's wallet to the SafeChain treasury account
-  `CRQ3vWquPewjJhfvuJFVWiW1qkwoSD94W694SjkU6JuM`.
+- A SOL transfer from the citizen's wallet to the SafeChain treasury account.
 - A **Memo instruction** that stores an encrypted payment payload on-chain.
-- The confirmed transaction signature becomes an **immutable, publicly verifiable
-  receipt** — anyone can check it on Solana Explorer.
+- The confirmed transaction signature becomes an **immutable, publicly verifiable receipt** — anyone can check it on Solana Explorer.
+- **Violation NFTs**: SafeChain leverages **Non-Fungible Tokens (NFTs)** to manage violation records, creating an immutable, tamper-proof history of traffic offenses.
 
-No custom on-chain program is needed: the app uses Solana's native System and Memo
-programs, which keeps it reliable and trustless. The memo payload is encrypted by the
-backend with AES-256-GCM before the wallet signs. Each violation record also carries a
-**SHA-256 fingerprint**, displayed in the app for integrity verification.
+No custom on-chain program is needed: the app uses Solana's native System and Memo programs, which keeps it reliable and trustless. The memo payload is encrypted by the backend with AES-256-GCM before the wallet signs. Each violation record also carries a **SHA-256 fingerprint**, displayed in the app for integrity verification.
 
 ## Features
 
-- Single security-code entry that mirrors the SMS flow exactly
-- Transparent violation evidence — traffic-camera capture, ANPR plate recognition,
-  and a location map (all rendered as self-contained SVG)
-- Full violation details and a transparent fine breakdown
-- Real Macedonian fine prices in EUR, converted to MKD, with the 50% early-payment
-  deduction for the first 8 days
-- Non-crypto payment path backed by the backend/database
-- On-chain fine payment via a Solana wallet, with an explorer-verifiable receipt and
-  encrypted memo
-- Prominent anti-phishing education, including a legitimate-vs-scam SMS comparison
-- Macedonian, English, and Serbian Cyrillic (toggle)
-- Responsive, designed mobile-first — people open this on their phone
+- Single security-code entry that mirrors the SMS flow exactly.
+- Transparent violation evidence — traffic-camera capture, ANPR plate recognition, and a location map.
+- Real Macedonian fine prices in EUR, converted to MKD, with the 50% early-payment deduction for the first 8 days.
+- Non-crypto payment path backed by the backend/database.
+- On-chain fine payment via a Solana wallet, with an explorer-verifiable receipt and encrypted memo.
+- PDF Appeal generator with an online signature that gets sent directly to the Minestry of internal affairs.
+- Violations stored as NFTs.
 
 ## Tech stack
 
-- React 18 + TypeScript + Vite 6
+- React + TypeScript + Vite
 - Tailwind CSS
 - `@solana/web3.js` + Solana Wallet Adapter + SPL Memo
 - Node HTTP backend
