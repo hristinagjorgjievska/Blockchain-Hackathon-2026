@@ -167,20 +167,6 @@ backend/
   supabase/schema.sql    database schema and prototype RLS policies
 ```
 
-## Scope notes (honest disclosure)
-
-- This is a **hackathon prototype**, not an official government service.
-- Violation records are served by the backend from Supabase once the schema is applied
-  and seeded. In production they would come from the official SafeChain case-management
-  system; the security code acts as the citizen's bearer token to retrieve their own
-  record.
-- Evidence imagery is generated (stylized SVG) to illustrate the concept while
-  rendering the *specific* violation data (plate, speed, time, location).
-- Crypto payment is genuinely on-chain and verifiable, running on Solana devnet.
-- Non-crypto payment is a backend/database record in this prototype; production would
-  connect the same route to an official card or bank processor.
-
-
 ## Team
 
 - Ognen Mladenovski - FINKI
