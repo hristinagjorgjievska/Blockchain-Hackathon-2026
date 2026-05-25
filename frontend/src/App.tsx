@@ -8,6 +8,20 @@ import { Home } from './pages/Home';
 import { ViolationView } from './pages/ViolationView';
 import { isValidCodeFormat, type Violation } from './data/violations';
 
+// Bump to invalidate stale local payment/appeal caches from prior demo runs.
+const DEMO_DATA_VERSION = '2026-05-25-v2';
+if (typeof window !== 'undefined') {
+  try {
+    if (localStorage.getItem('safecity:demo_version') !== DEMO_DATA_VERSION) {
+      localStorage.removeItem('safecity:payments');
+      localStorage.removeItem('safecity:violation_status');
+      localStorage.setItem('safecity:demo_version', DEMO_DATA_VERSION);
+    }
+  } catch {
+    /* ignore */
+  }
+}
+
 type View = { name: 'home' } | { name: 'violation'; code: string; violation?: Violation };
 
 function viewFromHash(): View {

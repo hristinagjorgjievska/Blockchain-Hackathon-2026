@@ -2,7 +2,8 @@ import { priced } from './pricing.js';
 
 /**
  * Demonstration dataset used for Supabase seeding and offline fallback.
- * Mirrors the 12 NFT records shown on the home page.
+ * Mirrors the 8 NFT records shown on the home page:
+ * 5 unpaid, 1 paid, 1 appeal_pending, 1 voided.
  */
 export const DEMO_VIOLATIONS = [
   // UNPAID
@@ -83,12 +84,11 @@ export const DEMO_VIOLATIONS = [
     },
   }),
 
-  // PAID
   priced({
     code: 'SC-8B5F3D1C7A4E',
     refId: 'SC-2026-050331',
     kind: 'red_light',
-    status: 'paid',
+    status: 'unpaid',
     plate: 'SK 7042 BC',
     vehicleMake: 'Volkswagen Golf',
     carColor: 'silver',
@@ -114,7 +114,7 @@ export const DEMO_VIOLATIONS = [
     code: 'SC-3D9A2F7B4C1E',
     refId: 'SC-2026-050112',
     kind: 'expired_registration',
-    status: 'paid',
+    status: 'unpaid',
     plate: 'TT 1092 VM',
     vehicleMake: 'Renault Clio',
     carColor: 'blue',
@@ -132,6 +132,8 @@ export const DEMO_VIOLATIONS = [
       sr: 'Истекла регистрација или саобраћајна дозвола: 100 EUR за возача; 250 EUR за власника ако је друго лице.',
     },
   }),
+
+  // PAID
   priced({
     code: 'SC-5C8E1A3B6F2D',
     refId: 'SC-2026-050268',
@@ -140,12 +142,12 @@ export const DEMO_VIOLATIONS = [
     plate: 'KM 7723 BG',
     vehicleMake: 'Skoda Octavia',
     carColor: 'red',
-    dateTime: '2026-05-10T12:45:00',
+    dateTime: '2026-05-09T15:30:00',
     street: { mk: 'Ул. Индустриска', en: 'Industrial St.', sr: 'Улица Индустријска' },
     city: { mk: 'Куманово', en: 'Kumanovo', sr: 'Куманово' },
     coordinates: { lat: 42.13281, lng: 21.71432 },
     cameraId: 'CAM-KM-007',
-    issuedAt: '2026-05-10T13:02:00',
+    issuedAt: '2026-05-09T15:55:00',
     baseFineEUR: 30,
     parkingSeverity: 'standard',
     legalNote: {
@@ -156,28 +158,6 @@ export const DEMO_VIOLATIONS = [
   }),
 
   // VOIDED
-  priced({
-    code: 'SC-2E6B4D9F1C8A',
-    refId: 'SC-2026-048872',
-    kind: 'expired_registration',
-    status: 'voided',
-    plate: 'GV 5519 KL',
-    vehicleMake: 'Peugeot 208',
-    carColor: 'white',
-    dateTime: '2026-04-28T15:20:00',
-    street: { mk: 'Ул. Кичевска', en: 'Kichevska St.', sr: 'Улица Кичевска' },
-    city: { mk: 'Гостивар', en: 'Gostivar', sr: 'Гостивар' },
-    coordinates: { lat: 41.79591, lng: 20.90762 },
-    cameraId: 'CAM-GV-002',
-    issuedAt: '2026-04-28T15:44:00',
-    baseFineEUR: 100,
-    ownerFineEUR: 250,
-    legalNote: {
-      mk: 'Истечена регистрација или сообраќајна дозвола: 100 EUR за возачот; 250 EUR за сопственикот ако е друго лице.',
-      en: 'Expired registration or traffic permit: EUR 100 for the driver; EUR 250 for the owner if different.',
-      sr: 'Истекла регистрација или саобраћајна дозвола: 100 EUR за возача; 250 EUR за власника ако је друго лице.',
-    },
-  }),
   priced({
     code: 'SC-4F1A8B2D5E9C',
     refId: 'SC-2026-049011',
@@ -201,56 +181,8 @@ export const DEMO_VIOLATIONS = [
       sr: 'Прекорачење од 20 до 30 km/h изнад ограничења: 45 EUR.',
     },
   }),
-  priced({
-    code: 'SC-6D3C5A8E2F1B',
-    refId: 'SC-2026-049233',
-    kind: 'red_light',
-    status: 'voided',
-    plate: 'SK 4407 LR',
-    vehicleMake: 'Audi A4',
-    carColor: 'black',
-    dateTime: '2026-05-01T19:05:00',
-    street: { mk: 'Бул. Илинден', en: 'Ilinden Blvd.', sr: 'Булевар Илинден' },
-    city: { mk: 'Скопје', en: 'Skopje', sr: 'Скопље' },
-    coordinates: { lat: 41.99624, lng: 21.43090 },
-    cameraId: 'CAM-SK-007',
-    issuedAt: '2026-05-01T19:28:00',
-    baseFineEUR: 250,
-    drivingBan: {
-      mk: 'Забрана за управување од 3 до 12 месеци.',
-      en: 'Driving ban from 3 to 12 months.',
-      sr: 'Забрана управљања од 3 до 12 месеци.',
-    },
-    legalNote: {
-      mk: 'Минување на црвено светло: 250 EUR и забрана за управување од 3 до 12 месеци.',
-      en: 'Running a red light: EUR 250 and a driving ban from 3 to 12 months.',
-      sr: 'Пролазак кроз црвено светло: 250 EUR и забрана управљања од 3 до 12 месеци.',
-    },
-  }),
 
   // APPEAL PENDING
-  priced({
-    code: 'SC-1B7E4F2C9A3D',
-    refId: 'SC-2026-051402',
-    kind: 'expired_registration',
-    status: 'appeal_pending',
-    plate: 'SK 9930 VT',
-    vehicleMake: 'Mercedes-Benz C-Class',
-    carColor: 'white',
-    dateTime: '2026-05-13T16:20:00',
-    street: { mk: 'Бул. Кузман Ј. Питу', en: 'Kuzman J. Pitu Blvd.', sr: 'Булевар Кузман Ј. Питу' },
-    city: { mk: 'Скопје', en: 'Skopje', sr: 'Скопље' },
-    coordinates: { lat: 41.98897, lng: 21.43512 },
-    cameraId: 'CAM-SK-022',
-    issuedAt: '2026-05-13T16:44:00',
-    baseFineEUR: 100,
-    ownerFineEUR: 250,
-    legalNote: {
-      mk: 'Истечена регистрација или сообраќајна дозвола: 100 EUR за возачот; 250 EUR за сопственикот ако е друго лице.',
-      en: 'Expired registration or traffic permit: EUR 100 for the driver; EUR 250 for the owner if different.',
-      sr: 'Истекла регистрација или саобраћајна дозвола: 100 EUR за возача; 250 EUR за власника ако је друго лице.',
-    },
-  }),
   priced({
     code: 'SC-9A3B8C1D4F2E',
     refId: 'SC-2026-051518',
@@ -259,14 +191,14 @@ export const DEMO_VIOLATIONS = [
     plate: 'BT 4418 RD',
     vehicleMake: 'Ford Focus',
     carColor: 'red',
-    dateTime: '2026-05-12T20:35:00',
+    dateTime: '2026-05-05T10:35:00',
     street: { mk: 'Бул. 1 Мај', en: '1st of May Blvd.', sr: 'Булевар 1. мај' },
     city: { mk: 'Битола', en: 'Bitola', sr: 'Битола' },
     coordinates: { lat: 41.02972, lng: 21.33653 },
     speedRecorded: 94,
     speedLimit: 50,
     cameraId: 'CAM-BT-011',
-    issuedAt: '2026-05-12T20:58:00',
+    issuedAt: '2026-05-05T10:58:00',
     baseFineEUR: 300,
     drivingBan: {
       mk: 'Забрана за управување од 3 до 12 месеци.',
@@ -277,28 +209,6 @@ export const DEMO_VIOLATIONS = [
       mk: 'Пречекорување од 30 до 50 km/h над дозволеното: 300 EUR и забрана за управување од 3 до 12 месеци.',
       en: 'Speeding 30 to 50 km/h over the limit: EUR 300 and a driving ban from 3 to 12 months.',
       sr: 'Прекорачење од 30 до 50 km/h изнад ограничења: 300 EUR и забрана управљања од 3 до 12 месеци.',
-    },
-  }),
-  priced({
-    code: 'SC-3F5D2A7B8E1C',
-    refId: 'SC-2026-051633',
-    kind: 'no_parking',
-    status: 'appeal_pending',
-    plate: 'OH 2241 KT',
-    vehicleMake: 'Kia Sportage',
-    carColor: 'black',
-    dateTime: '2026-05-14T11:15:00',
-    street: { mk: 'Кеј Маршал Тито', en: 'Marshal Tito Quay', sr: 'Кеј Маршал Тито' },
-    city: { mk: 'Охрид', en: 'Ohrid', sr: 'Охрид' },
-    coordinates: { lat: 41.11221, lng: 20.79883 },
-    cameraId: 'CAM-OH-007',
-    issuedAt: '2026-05-14T11:38:00',
-    baseFineEUR: 45,
-    parkingSeverity: 'obstructing',
-    legalNote: {
-      mk: 'Непрописно паркирање со попречување на сообраќајот: 45 EUR.',
-      en: 'Illegal parking that obstructs traffic: EUR 45.',
-      sr: 'Непрописно паркирање које омета саобраћај: 45 EUR.',
     },
   }),
 ];

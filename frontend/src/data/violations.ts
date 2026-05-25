@@ -102,11 +102,11 @@ function priced(seed: ViolationSeed): Violation {
 }
 
 /**
- * Demonstration dataset — 8 violations: 6 unpaid, 2 voided.
+ * Demonstration dataset — 8 violations: 5 unpaid, 1 paid, 1 appeal_pending, 1 voided.
  */
 export const VIOLATIONS: Violation[] = [
 
-  // ── UNPAID (6) ───────────────────────────────────────────────────────────
+  // ── UNPAID (5) ───────────────────────────────────────────────────────────
 
   priced({
     code: 'SC-A3F7B2C8D1E5',
@@ -234,11 +234,13 @@ export const VIOLATIONS: Violation[] = [
     },
   }),
 
+  // ── PAID (1) ─────────────────────────────────────────────────────────────
+
   priced({
     code: 'SC-F1A6C4D7B3E8',
     refId: 'SC-2026-050428',
     kind: 'expired_registration',
-    status: 'unpaid',
+    status: 'paid',
     plate: 'SK 501 TB',
     vehicleMake: 'Seat Cordoba',
     carColor: 'black',
@@ -257,13 +259,13 @@ export const VIOLATIONS: Violation[] = [
     },
   }),
 
-  // ── VOIDED (2) ───────────────────────────────────────────────────────────
+  // ── APPEAL PENDING (1) ───────────────────────────────────────────────────
 
   priced({
     code: 'SC-2A9F4E7B1C3D',
     refId: 'SC-2026-048872',
     kind: 'expired_registration',
-    status: 'voided',
+    status: 'appeal_pending',
     plate: 'SK 501 TB',
     vehicleMake: 'Seat Cordoba',
     carColor: 'black',
@@ -281,6 +283,8 @@ export const VIOLATIONS: Violation[] = [
       sr: 'Истекла регистрација или саобраћајна дозвола: 100 EUR за возача; 250 EUR за власника ако је друго лице.',
     },
   }),
+
+  // ── VOIDED (1) ───────────────────────────────────────────────────────────
 
   priced({
     code: 'SC-3B1D8F5A2E9C',
